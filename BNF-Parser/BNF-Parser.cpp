@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <map>
 #include <algorithm>
@@ -11,8 +11,14 @@ using std::map;
 
 
 // Terms and nonTerms - nonTerms are all caps(except for prime 'p'), terms are all lower
-string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "TERM", "TERMp", "FACTOR" };
-string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num" };
+// Book Parts
+ string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "TERM", "TERMp", "FACTOR" };
+ string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num" };
+
+// Modified Parts
+//string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "LTERM", "LTERMp", "RTERM", "RTERMp", "GFACTOR", "POSVAL", "SPACENEGVAL", "FACTOR" };
+//string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
+
 
 vector<string> readInFile(string filePath) {
 	vector<string> lines;
@@ -36,6 +42,8 @@ vector<vector<string>> createProductionTable() {
 	vector<vector<string>> productionTable;
 
 	// Insert productions into structure
+
+	// Book Table
 	productionTable.push_back({ "EXPR" });
 	productionTable.push_back({ "TERM", "EXPRp" });
 	productionTable.push_back({ "+", "TERM", "EXPRp" });
@@ -49,7 +57,98 @@ vector<vector<string>> createProductionTable() {
 	productionTable.push_back({ "num" });
 	productionTable.push_back({ "name" });
 
+		
+	// Modified Version
+	//productionTable.push_back({ "EXPR" });				// 0.   Goal ->Expr
+	//productionTable.push_back({ "LTERM", "EXPRp" });		// 1.   Expr ->LTerm Expr’
+	//productionTable.push_back({ "LFACTOR", "TERMp" });	// 2.   LTerm->LFactor Term’
+	//productionTable.push_back({ "LFACTOR", "TERMp" });	// 3.   RTerm->RFactor Term’
+	//productionTable.push_back({ "+", "RTERM", "EXPRp" });	// 4.   Expr’-> + RTerm Expr’
+	//productionTable.push_back({ "-", "RTERM", "EXPRp" });	// 5.         | - RTerm Expr’
+	//productionTable.push_back({ "*", "RTERM", "EXPRp" });	// 7.   Term’-> * RTerm Expr’
+	//productionTable.push_back({ "/", "RTERM", "EXPRp" });	// 8.         | / RTerm Expr’
+	//productionTable.push_back({ "GFACTOR" });				// 10. LFactor->GFactor
+	//productionTable.push_back({ "negnum" });				// 11.        | negnum    //negative val without space only left term 
+	//productionTable.push_back({ "negname" });				// 12.        | negname   //negative name without space only left term 
+	//productionTable.push_back({ "GFACTOR" });				// 13. RFactor->GFactor
+	//productionTable.push_back({ "(", "EXPR", ")" });		// 14. GFactor-> (Expr)
+	//productionTable.push_back({ "POSVAL" });				// 15.        | PosVal
+	//productionTable.push_back({ "SPACENEGVAL" });			// 16.        | SpaceNegVal
+	//productionTable.push_back({ "num" });					// 17. PosVal->num
+	//productionTable.push_back({ "name" });				// 18.        | name
+	//productionTable.push_back({ "spacenegnum" });			// 19. SpaceNegVal->spacenegnum
+	//productionTable.push_back({ "spacenegname" });		// 20.        | spacenegname
+
 	return productionTable;
+}
+
+void first(vector<vector<string>> productionTable) {
+	map<string, string> firstTable;
+
+	for (string term : terminals)
+		firstTable[term] = term;
+
+	for (string nonTerm : nonTerminals)
+		firstTable[nonTerm] = "";
+
+	bool hasChanged = true;
+	while (hasChanged) {
+		for (vector<string> production : productionTable) {
+			// TODO: Maybe if statement here?
+			string rhs = firstTable[production[0]];
+			int i = 1;
+			for (i; i <= production.size() && firstTable[production[i]] == "e"; i++) {
+				for (int j = 0; j < firstTable[production[i]].size(); j++) {
+					if (firstTable[production[i + 1]] != "e")
+						rhs += firstTable[production[i + 1]]; // TODO: is this right?
+				}
+			}
+
+			bool foundE = false;
+
+			for (int j = 0; j < firstTable[production.back()]; j++) {
+
+			}
+
+			if (i == production.size() && ) {
+
+			}
+		}
+
+	}
+}
+
+void follow() {
+//	for each A ∈ N T do;
+//	FOLLOW(A) ← ∅;
+//	end;
+//	FOLLOW(S) ← { eof };
+//	while (FOLLOW sets are still changing) do;
+//	for each p ∈ P of the form A→β1β2 ···βk do;
+//	TRAILER ← FOLLOW(A);
+//	for i ← k down to 1 do;
+//	if βi ∈ N T then begin;
+//	FOLLOW(βi
+//	) ← FOLLOW(βi
+//	) ∪ TRAILER;
+//	if  ∈ FIRST(βi
+//	)
+//		then TRAILER ← TRAILER ∪(FIRST(βi
+//		) − );
+//	else TRAILER ← FIRST(βi
+//	);
+//	end;
+//	else TRAILER ← FIRST(βi
+//	); // is {βi
+//}
+//end;
+//end;
+//end;
+}
+
+void firstPlus() {
+	// if e in first() then first()
+	// else first() and follow()
 }
 
 map<string, map<string, int>> createParseTable() {
@@ -63,6 +162,9 @@ map<string, map<string, int>> createParseTable() {
 			parseTable[nonTerminal][terminal] = -1;
 		}
 	}
+
+	// Book Table - Hard Coded
+	/*
 
 	// Goal
 	parseTable["GOAL"]["("] = 0;
@@ -98,44 +200,114 @@ map<string, map<string, int>> createParseTable() {
 	parseTable["FACTOR"]["name"] = 11;
 	parseTable["FACTOR"]["num"] = 10;
 
+	*/
+
+	// Algorithm
+	//build FIRST, FOLLOW, and FIRST + sets;
+	//for each nonterminal A do;
+	//for each terminal w do;
+	//Table[A, w] <- error;
+	//end;
+	//for each production p of the form A->B do;
+	//for each terminal w in FIRST + (A->B) do;
+	//Table[A, w] < -p;
+	//end;
+	//if eof in FIRST + (A→B)
+	//	then Table[A, eof] < -p;
+	//end;
+	//end;
+
 	return parseTable;
 }
 
-string getFocus(string word) {
+string getTermType(string word) {
 	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals))) {
-		if (std::isdigit(word[0]))
+		if (std::isdigit(word[0])) {
+
+			bool hasDecimal = false;
+			for (char letter : word) {
+				if (!std::isdigit(letter) && letter != '.') {
+					return "error";
+				}
+
+				if (letter == '.') {
+					if (hasDecimal) 
+						return "error";
+
+					hasDecimal = true;
+				}
+			}
+
 			return "num";
-		else
+		}
+		else {
+
+			for (char letter : word) {
+				if (letter == '.')
+					return "error";
+			}
+
 			return "name";
+		}
 	}
 
 	return word;
 }
 
 string nextWord(string& line) {
-	char keyTerms[] = { '+', '-', '*', '/', '(', ')' };
+	char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^'};
 	string word = "";
+	bool finished = false;
 
-	if (line.size() > 0) {
+	if (line.size() > 0 && !finished) {
 		word += line[0];
 
-		for (int i = 0; i < line.length(); i++) {
+		for (char term : keyTerms) {
+			if (word[0] == term) {
+				finished = true;
+				break;
+			}
+		}
+
+		for (int i = 1; i < line.length() && !finished; i++) {
+			if (line[i] == ' ' && line[i - 1] != ' ')
+				break;
+
 			for (char term : keyTerms) {
-				if (line[i] == term || line[i] == ' ') {
+
+				if (line[i] == term) {
+					finished = true;
+
+					bool isAllSpace = true;
+					for (char letter : word) {
+						if (letter != ' ') {
+							isAllSpace = false;
+							break;
+						}
+					}
+
+					if (isAllSpace)
+						word += line[i];
+
 					break;
 				}
 			}
-
-			word += line[i];
+			if (!finished)
+				word += line[i];
 		}
 	}
 
 	line.erase(0, word.size());
 
+	while (word[0] == ' ') {
+		word.erase(0, 1);
+	}
+	// TODO: add in negatives
+
 	if (word == "")
 		word = "eof";
 
-	return getFocus(word);
+	return word;
 }
 
 int checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line) {
@@ -154,7 +326,7 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 			return 1;
 		}
 		else if ((std::find(std::begin(terminals), std::end(terminals), focus) != std::end(terminals)) || focus == "eof") {
-			if (focus == word) {
+			if (focus == getTermType(word)) {
 				stack.pop_back();
 				word = nextWord(line);
 			}
@@ -164,21 +336,30 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 			}
 		}
 		else {
-			// focus is a nonterminal 
-			int productionNum = parseTable[focus][word];
-			vector<string> curProduction = productionTable[productionNum];
+			try {
+				// focus is a nonterminal
+				string termType = getTermType(word);
+				int productionNum = parseTable[focus][termType];
+				if (productionNum == -1 || termType == "error")
+					return 0;
 
-			if (!curProduction.empty()) {
-				stack.pop_back();
-				for (int i = curProduction.size() - 1; i >= 0; i--) {
-					if (curProduction[i] != "e") {
-						stack.push_back(curProduction[i]);
+				vector<string> curProduction = productionTable[productionNum];
+
+				if (!curProduction.empty()) {
+					stack.pop_back();
+					for (int i = curProduction.size() - 1; i >= 0; i--) {
+						if (curProduction[i] != "e") {
+							stack.push_back(curProduction[i]);
+						}
 					}
-				}
 
+				}
+				else {
+					// report an error expanding focus;
+					return 0;
+				}
 			}
-			else {
-				// report an error expanding focus;
+			catch (int ex) {
 				return 0;
 			}
 		}
