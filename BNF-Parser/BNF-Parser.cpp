@@ -82,7 +82,7 @@ vector<vector<string>> createProductionTable() {
 	return productionTable;
 }
 
-void first(vector<vector<string>> productionTable) {
+map<string, string> first(vector<vector<string>> productionTable) {
 	map<string, string> firstTable;
 
 	for (string term : terminals)
@@ -93,65 +93,111 @@ void first(vector<vector<string>> productionTable) {
 
 	bool hasChanged = true;
 	while (hasChanged) {
+		hasChanged = false;
 		for (vector<string> production : productionTable) {
 			// TODO: Maybe if statement here?
-			string rhs = firstTable[production[0]];
+			vector<string> rhs;
+			rhs.push_back(firstTable[production[0]]);
 			int i = 1;
 			for (i; i <= production.size() && firstTable[production[i]] == "e"; i++) {
 				for (int j = 0; j < firstTable[production[i]].size(); j++) {
 					if (firstTable[production[i + 1]] != "e")
-						rhs += firstTable[production[i + 1]]; // TODO: is this right?
+						rhs.push_back(firstTable[production[i + 1]]); // TODO: is this right?
 				}
 			}
 
-			bool foundE = false;
-
-			for (int j = 0; j < firstTable[production.back()]; j++) {
-
+			if (std::find(production.front(), production.back(), "e") != production.back()){
+				rhs.push_back("e");			
 			}
 
-			if (i == production.size() && ) {
-
-			}
+			map<string, string>& firstTableCopy = firstTable;
+			firstTable.insert(std::begin(rhs), std::end(rhs));
+			hasChanged |= (firstTableCopy.size() != firstTable.size());
 		}
 
 	}
+
+	return firstTable;
 }
 
-void follow() {
-//	for each A ∈ N T do;
-//	FOLLOW(A) ← ∅;
-//	end;
-//	FOLLOW(S) ← { eof };
-//	while (FOLLOW sets are still changing) do;
-//	for each p ∈ P of the form A→β1β2 ···βk do;
-//	TRAILER ← FOLLOW(A);
-//	for i ← k down to 1 do;
-//	if βi ∈ N T then begin;
-//	FOLLOW(βi
-//	) ← FOLLOW(βi
-//	) ∪ TRAILER;
-//	if  ∈ FIRST(βi
-//	)
-//		then TRAILER ← TRAILER ∪(FIRST(βi
-//		) − );
-//	else TRAILER ← FIRST(βi
-//	);
-//	end;
-//	else TRAILER ← FIRST(βi
-//	); // is {βi
-//}
-//end;
-//end;
-//end;
+map<string, string> follow(vector<vector<string>> productionTable, map<string, string> firstTable) {
+	map<string, string> followTable;
+
+
+	//	for each A ∈ N T do;
+	//	FOLLOW(A) ← ∅;
+	//	end;
+	for (string nonTerm : nonTerminals) {
+		followTable[nonTerm] = '\0';
+	}
+
+	//	FOLLOW(S) ← { eof };
+	followTable["S"] = "eof";
+	vector<string> trailer;
+
+	//	while (FOLLOW sets are still changing) do;
+	bool hasChanged = true;
+	while(hasChanged) {
+
+		//	for each p ∈ P of the form A→β1β2 ···βk do;
+		for(vector<string> production : productionTable) {
+			//	TRAILER ← FOLLOW(A);
+			trailer.insert(std::end(trailer), std::begin(production), std::end(production));
+
+			//	for i ← k down to 1 do;
+			for (int i = production.size(); i >= 0; i--) {
+				
+				//	if βi ∈ N T then begin;
+				if (std::find(std::begin(nonTerminals), std::end(nonTerminals), production[i]) != std::end(nonTerminals)) {
+
+					//	FOLLOW(βi) ← FOLLOW(βi) ∪ TRAILER;
+					followTable[production[i]].insert(std::end(followTable[production[i]]), std::begin(trailer), std::end(trailer));
+					// followTable[production[i]] = followTable[production[i]] + trailer; // TODO: add vector onto map?
+				}
+
+				if (production[i] == "e") {
+					//	if  ∈ FIRST(βi)
+					//		then TRAILER ← TRAILER ∪(FIRST(βi) − );
+					for (string part : production) {
+						if (firstTable[production[i]] != "e")
+						trailer.push_back(firstTable[part]);
+					}
+
+				} else {
+					//	else TRAILER ← FIRST(βi);
+					trailer.clear();
+					trailer.push_back(firstTable[production[i]]);
+				
+				}
+				
+			}
+			
+			map<string, string>& tableCopy = followTable;
+			followTable.insert(std::begin(trailer), std::end(trailer));
+			hasChanged |= (tableCopy.size() != followTable.size());
+		}
+	}
+
+	//  is {βi}
+	//end;
+	//end;
+	//end;
+	return followTable;
 }
 
-void firstPlus() {
+map<string, string> firstPlus(map<string, string> firstTable, map<string, string> followTable) {
 	// if e in first() then first()
+	// if (std::find(std::begin(firstTable), std::end(firstTable), "e") != std::end(firstTable))
+	// 	return firstTable;
+
 	// else first() and follow()
+	if (std::find(std::begin(firstTable), std::end(firstTable), "e") == std::end(firstTable))
+		firstTable.insert(followTable.begin(), followTable.end());
+		
+	return firstTable;
 }
 
-map<string, map<string, int>> createParseTable() {
+map<string, map<string, int>> createParseTable(vector<vector<string>> productionTable) {
 
 	// Change specific spots to match the book
 	map<string, map<string, int>> parseTable;
@@ -204,18 +250,37 @@ map<string, map<string, int>> createParseTable() {
 
 	// Algorithm
 	//build FIRST, FOLLOW, and FIRST + sets;
+	map<string, string> firstTable = first(productionTable);
+	map<string, string> followTable = follow(productionTable, firstTable);
+	map<string, string> firstPlusTable = firstPlus(firstTable, followTable);
+
 	//for each nonterminal A do;
-	//for each terminal w do;
-	//Table[A, w] <- error;
+	for (string nonTerm : nonTerminals) {
+		//for each terminal w do;
+		for (string term : terminals) {
+			//Table[A, w] <- error; // This is done above
+		//end;
+		}
+		//for each production p of the form A->B do;
+		for (int i = 0; i < productionTable.size(); i++) { // (vector<string> production : productionTable)
+			//for each terminal w in FIRST + (A->B) do;
+			for (string term : terminals) {
+				//Table[A, w] <- p;
+				parseTable[nonTerm][term] = i;
+			//end;
+			}
+			//if eof in FIRST + (A→B)
+			if (std::find(std::begin(firstPlusTable), std::end(firstPlusTable), "eof") != std::end(firstPlusTable)) {
+				//	then Table[A, eof] <- p;
+				parseTable[nonTerm]["eof"] = i;
+			}
+		//end;
+		}
+		
 	//end;
-	//for each production p of the form A->B do;
-	//for each terminal w in FIRST + (A->B) do;
-	//Table[A, w] < -p;
-	//end;
-	//if eof in FIRST + (A→B)
-	//	then Table[A, eof] < -p;
-	//end;
-	//end;
+	}
+
+	
 
 	return parseTable;
 }
@@ -374,7 +439,7 @@ int main()
 
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
-	map<string, map<string, int>> parseTable = createParseTable();
+	map<string, map<string, int>> parseTable = createParseTable(productionTable);
 
 	for (string line : file) {
 		string passedStr = "invalid";
