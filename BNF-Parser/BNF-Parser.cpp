@@ -83,6 +83,8 @@ vector<vector<string>> createProductionTable() {
 }
 
 map<string, string> first(vector<vector<string>> productionTable) {
+	// https://japp.io/compiler-design/first-and-follow-program-for-cfg-in-c-c/
+	// https://github.com/shivam2296/First-and-Follow/blob/master/first%26follow.cpp
 	map<string, string> firstTable;
 
 	for (string term : terminals)
