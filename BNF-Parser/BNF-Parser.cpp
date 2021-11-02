@@ -111,6 +111,8 @@ string getTerm(int productionNum) {
 	case 11:
 		return "FACTOR";
 	}
+
+	return "";
 }
 
 bool isProduction(string nonTerm, int productionNum) {
@@ -129,107 +131,122 @@ bool isProduction(string nonTerm, int productionNum) {
 }
 
 bool isNonTerminal(string term) {
-	for (string nonTerm : nonTerminals) {
-		if (term == nonTerm)
+	for (int i = 0; i < nonTerminals.size(); i++) {
+		if (term == nonTerminals[i])
 			return true;
 	}
 	return false;
 }
 
-void first(vector< vector<string> > productionTable, map< string, set<string> >& firstTable, string nonTerm) {
+set<string> unionSets(set<string> set1, set<string> set2) {
+    set<string> s;
+    std::set_union(set1.begin(), set1.end(),
+                set2.begin(), set2.end(),
+                std::inserter(s, s.begin()));
 
-	for (int i = 0; i < productionTable.size(); i++) {
-		// Find productions of the non terminal
-		if (!isProduction(nonTerm, i)) {
-			continue;
-		}
-
-		vector<string> rhs = productionTable[i];
-		// Loop till a non terminal or no epsilon variable found
-		for (auto ch = rhs.begin(); ch != rhs.end(); ch++) {
-			// If first part in production a non term, add it to firsts list
-			if (isNonTerminal(*ch) ) {
-				firstTable[nonTerm].insert(*ch);
-				break;
-			}
-			else {
-				// If char in prod is non terminal and whose firsts has no yet been found out
-				// Find first for that non terminal
-				if (firstTable[*ch].empty()) {
-					first(productionTable, firstTable, *ch);
-				}
-				// If variable doesn't have epsilon, stop loop
-				if (firstTable[*ch].find("e") == firstTable[*ch].end()) {
-					firstTable[nonTerm].insert(firstTable[*ch].begin(), firstTable[*ch].end());
-					break;
-				}
-
-				set<string> firstTableCopy(firstTable[*ch].begin(), firstTable[*ch].end());
-
-				// Remove epsilon from firsts if not the last variable
-				if (ch + 1 != rhs.end()) {
-					firstTableCopy.erase("e");
-				}
-
-				// Append firsts of that variable
-				firstTable[nonTerm].insert(firstTableCopy.begin(), firstTableCopy.end());
-			}
-		}
-
-	}
+	return s;
 }
 
-void follow(vector< vector<string> > productionTable, map< string, set<string> >& followTable, map< string, set<string> > firstTable, string nonTerm) {
+set<string> removeElement(set<string> set1, string removeStr) {
+    for(auto it = set1.begin(); it != set1.end(); ++it) {
+        if (*it == removeStr) {
+            set1.erase(it);
+            return set1;
+        }
+    }
+    return set1;
+}
 
-	// cout<<"Finding follow of "<<non_term<<"\n";
+void first(vector< vector<string> > productionTable, map< string, set<string> >& firstTable) {
 
-	for (int i = 0; i < productionTable.size(); i++) {
+	map<string, set<string>> firstTableCopy = firstTable;
+	bool changing = true;
 
-		// finished is true when finding follow from this production is complete
-		bool finished = true;
-		auto ch = std::begin(productionTable[i]);
+	while (changing) {
+		for (int j = 0; j < productionTable.size(); j++) {
+			vector<string> production = productionTable[j];
+			set<string> rhs = removeElement(firstTable[production[0]], "e");
+			int i = 1;
 
-		// Skip variables till read non terminal
-		for (; ch != std::end(productionTable[i]); ++ch) {
-			if (*ch == nonTerm) {
-				finished = false;
-				break;
+			for (int c = 0; c < production.size(); c++) {
+				string part = production[c];
+				if (part == "e" && i+1 <= production.size() - 1) {
+					rhs = unionSets(rhs, firstTable[production[i+1]]); // TODO: fix this
+					i++;
+				}
 			}
-		}
-		++ch;
 
-		for (; ch != std::end(productionTable[i]) && !finished; ++ch) {
-			// If non terminal, just append to follow
-			if (isNonTerminal(*ch)) {
-				followTable[nonTerm].insert(*ch);
-				finished = true;
-				break;
+			if (production.back() == "e" && production.size() == 1) {
+				rhs.insert("e");
 			}
 
-			set<string> firstTableCopy(firstTable[*ch]);
-			// If char's firsts doesnt have epsilon follow search is over 
-			if (firstTableCopy.find("e") == firstTableCopy.end()) {
-				followTable[nonTerm].insert(firstTableCopy.begin(), firstTableCopy.end());
-				finished = true;
-				break;
-			}
-			// Else next char has to be checked after appending firsts to follow
-			firstTableCopy.erase("e");
-			followTable[nonTerm].insert(firstTableCopy.begin(), firstTableCopy.end());
-
+			firstTable[getTerm(j)] = unionSets(firstTable[getTerm(j)], rhs);
 		}
 
-
-		// If end of production, follow same as follow of variable
-		if (ch == std::end(productionTable[i]) && !finished) {
-			// Find follow if it doesn't have
-			if (followTable[getTerm(i)].empty()) {
-				follow(productionTable, followTable, firstTable, getTerm(i));
-			}
-			followTable[nonTerm].insert(followTable[getTerm(i)].begin(), followTable[getTerm(i)].end());
+		if (firstTableCopy == firstTable) {
+			changing = false;
+		} else {
+			firstTableCopy = firstTable;
 		}
-
 	}
+
+}
+
+void follow(vector< vector<string> > productionTable, map< string, set<string> >& followTable, map< string, set<string> > firstTable) {
+
+	for (string nonTerm : nonTerminals) {
+		followTable[nonTerm].clear();
+	}
+
+	followTable["GOAL"].insert("eof");
+
+	map<string, set<string>> followTableCopy = followTable;
+	bool changing = true;
+	while(changing) {
+		for (int j = 0; j < productionTable.size(); j++) {
+			vector<string> production = productionTable[j];
+
+			set<string> trailer = followTable[getTerm(j)];
+			int k = production.size();
+
+			for (int i = k - 1; i >= 0; --i) {
+				if (isNonTerminal(production[i])) {
+					followTable[production[i]] = unionSets(followTable[production[i]], trailer);
+
+					if (firstTable[production[i]].find("e") != firstTable[production[i]].end()) {
+						trailer = unionSets(trailer, removeElement(firstTable[production[i]], "e"));
+					} else {
+						trailer = firstTable[production[i]];
+					}
+
+				} else {
+					trailer = firstTable[production[i]];
+				}
+
+			}
+		}
+
+		if (followTableCopy == followTable) {
+			changing = false;
+		} else {
+			followTableCopy = followTable;
+		}
+	}
+
+//	while (FOLLOW sets are still changing) do;
+//		for each p ∈ P of the form A→β1β2 ···βk do;
+//		TRAILER ← FOLLOW(A);
+//		for i ← k down to 1 do;
+//			if βi ∈ N T then begin;
+//				FOLLOW(βi) ← FOLLOW(βi) ∪ TRAILER;
+//					if  ∈ FIRST(βi)
+//						then TRAILER ← TRAILER ∪(FIRST(βi) − );
+//					else TRAILER ← FIRST(βi);
+//					end;
+//			else TRAILER ← FIRST(βi); // is {βi}
+//			end;
+//		end;
+//end;
 
 }
 
@@ -300,25 +317,21 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 	// Algorithm
 	//build FIRST, FOLLOW, and FIRST + sets;
 	map< string, set<string> > firstTable;
-	for (auto nonTerm = std::begin(nonTerminals); nonTerm != std::end(nonTerminals); ++nonTerm) {
-		if (firstTable[*nonTerm].empty()) {
-			first(productionTable, firstTable, *nonTerm);
-		}
+	for (string term : terminals) {
+		firstTable[term].insert(term);
 	}
+	for (string nonTerm : nonTerminals) {
+		firstTable[nonTerm].clear();
+	}
+
+	first(productionTable, firstTable);
+
 
 	map< string, set<string> > followTable;
-	string startNonTerm = "GOAL";
-	followTable[startNonTerm].insert("$");
-	follow(productionTable, followTable, firstTable, startNonTerm);
-	// Find follows for rest of variables
-	for (string nonTerm : nonTerminals) {
-		if (followTable[nonTerm].empty()) {
-			follow(productionTable, followTable, firstTable, nonTerm);
-		}
-	}
+	follow(productionTable, followTable, firstTable);
 
-	 //map<string, vector<string>> firstPlusTable = firstPlus(productionTable, 0, firstTable, followTable);
-	 //int parse_table[non_terms.size()][terms.size()];
+	//map<string, vector<string>> firstPlusTable = firstPlus(productionTable, 0, firstTable, followTable);
+	//int parse_table[non_terms.size()][terms.size()];
 	
 	for (int i = 0; i < productionTable.size(); i++) {
 		vector<string> rhs = productionTable[i];
