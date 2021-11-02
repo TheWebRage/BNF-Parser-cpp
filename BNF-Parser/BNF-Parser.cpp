@@ -279,8 +279,8 @@ void follow(vector< vector<string> > productionTable, map< string, set<string> >
     //		for i ← k down to 1 do;
     //			if βi ∈ N T then begin;
     //				FOLLOW(βi) ← FOLLOW(βi) ∪ TRAILER;
-    //					if  ∈ FIRST(βi)
-    //						then TRAILER ← TRAILER ∪(FIRST(βi) − );
+    //					if e ∈ FIRST(βi)
+    //						then TRAILER ← TRAILER ∪(FIRST(βi) − e);
     //					else TRAILER ← FIRST(βi);
     //					end;
     //			else TRAILER ← FIRST(βi); // is {βi}
@@ -395,7 +395,7 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 		for (int j = 0; j < productionTable.size(); j++) {
 			vector<string> production = productionTable[j];
 
-			firstPlusSet = firstPlus(firstTable[nonTerm], followTable[nonTerm]); // TODO: call firstPlus() with correct parameters
+			firstPlusSet = firstPlus(firstTable[getTerm(j)], followTable[getTerm(j)]); // TODO: call firstPlus() with correct parameters
 			for (string item : firstPlusSet) {
 				parseTable[getTerm(j)][item] = j;
 			}
