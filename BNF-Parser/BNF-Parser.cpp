@@ -131,8 +131,16 @@ bool isProduction(string nonTerm, int productionNum) {
 }
 
 bool isNonTerminal(string term) {
-	for (int i = 0; i < nonTerminals.size(); i++) {
-		if (term == nonTerminals[i])
+	for (string nonTerm : nonTerminals) {
+		if (term == nonTerm)
+			return true;
+	}
+	return false;
+}
+
+bool isInSet(set<string> set1, string itemInSet) {
+	for (string item : set1) {
+		if (itemInSet == item)
 			return true;
 	}
 	return false;
@@ -158,6 +166,13 @@ set<string> removeElement(set<string> set1, string removeStr) {
 }
 
 void first(vector< vector<string> > productionTable, map< string, set<string> >& firstTable) {
+
+	for (string term : terminals) {
+		firstTable[term].insert(term);
+	}
+	for (string nonTerm : nonTerminals) {
+		firstTable[nonTerm].clear();
+	}
 
 	map<string, set<string>> firstTableCopy = firstTable;
 	bool changing = true;
@@ -233,47 +248,38 @@ void follow(vector< vector<string> > productionTable, map< string, set<string> >
 		}
 	}
 
-//	while (FOLLOW sets are still changing) do;
-//		for each p ∈ P of the form A→β1β2 ···βk do;
-//		TRAILER ← FOLLOW(A);
-//		for i ← k down to 1 do;
-//			if βi ∈ N T then begin;
-//				FOLLOW(βi) ← FOLLOW(βi) ∪ TRAILER;
-//					if  ∈ FIRST(βi)
-//						then TRAILER ← TRAILER ∪(FIRST(βi) − );
-//					else TRAILER ← FIRST(βi);
-//					end;
-//			else TRAILER ← FIRST(βi); // is {βi}
-//			end;
-//		end;
-//end;
+    /*
+    //	while (FOLLOW sets are still changing) do;
+    //		for each p ∈ P of the form A→β1β2 ···βk do;
+    //		TRAILER ← FOLLOW(A);
+    //		for i ← k down to 1 do;
+    //			if βi ∈ N T then begin;
+    //				FOLLOW(βi) ← FOLLOW(βi) ∪ TRAILER;
+    //					if  ∈ FIRST(βi)
+    //						then TRAILER ← TRAILER ∪(FIRST(βi) − );
+    //					else TRAILER ← FIRST(βi);
+    //					end;
+    //			else TRAILER ← FIRST(βi); // is {βi}
+    //			end;
+    //		end;
+    //end;
+    */
 
 }
 
-map<string, vector<string>> firstPlus(vector<vector<string>> productionTable, int production, map<string, vector<string>> firstTable, map<string, vector<string>> followTable) {
+set<string> firstPlus(set<string> firstSet, set<string> followSet) {
 	// // if e in first() then first()
-	// //if (std::find(std::begin(firstTable), std::end(firstTable), "e") != std::end(firstTable))
-	// //	return firstTable;
 	// // else first() and follow()
-	//if (std::find(std::begin(firstTable), std::end(firstTable), "e") == std::end(firstTable)) {
-	//	for (string part : followTable[production])
-	//		firstTable[productionTable[production][0]].push_back(part);
-	//}
+	if (!isInSet(firstSet, "e")) {
+		firstSet = unionSets(firstSet, followSet);
+	}
 
-    return firstTable;
+    return firstSet;
 }
 
 map<string, map<string, int>> createParseTable(vector< vector<string> > productionTable) {
 
-	// Change specific spots to match the book
 	map<string, map<string, int>> parseTable;
-	
-	// Init parseTable to -1
-	for (string terminal : terminals) {
-		for (string nonTerminal : nonTerminals) {
-			parseTable[nonTerminal][terminal] = -1;
-		}
-	}
 
 	// Book Table - Hard Coded
 	/*
@@ -317,59 +323,92 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 	// Algorithm
 	//build FIRST, FOLLOW, and FIRST + sets;
 	map< string, set<string> > firstTable;
-	for (string term : terminals) {
-		firstTable[term].insert(term);
-	}
-	for (string nonTerm : nonTerminals) {
-		firstTable[nonTerm].clear();
-	}
-
 	first(productionTable, firstTable);
 
+    std::cout << "First:\n";
+    for (string term : terminals) {
+        std::cout << term << ": ";
+        for (string item : firstTable[term])
+            std::cout << item << " ";
+        
+        std::cout << "\n";
+    }
+    for (string nonTerm : nonTerminals) {
+        std::cout << nonTerm << ": ";
+        for (string item : firstTable[nonTerm])
+            std::cout << item << " ";
+        
+        std::cout << "\n";
+    }
 
 	map< string, set<string> > followTable;
 	follow(productionTable, followTable, firstTable);
-
-	//map<string, vector<string>> firstPlusTable = firstPlus(productionTable, 0, firstTable, followTable);
-	//int parse_table[non_terms.size()][terms.size()];
 	
-	for (int i = 0; i < productionTable.size(); i++) {
-		vector<string> rhs = productionTable[i];
+    std::cout << "\n\nFollow:\n";
+    for (string term : terminals) {
+        std::cout << term << ": ";
+        for (string item : followTable[term])
+            std::cout << item << " ";
+        
+        std::cout << "\n";
+    }
+    for (string nonTerm : nonTerminals) {
+        std::cout << nonTerm << ": ";
+        for (string item : followTable[nonTerm])
+            std::cout << item << " ";
+        
+        std::cout << "\n";
+    }
+	
+	set<string> firstPlusSet;
+	
+	for (string nonTerm : nonTerminals) {
+		for (string term : terminals) {
+			// Init parseTable to -1
+			parseTable[nonTerm][term] = -1;
+		}
 
-		set<string> nextList;
-		bool finished = false;
-		for (auto ch = rhs.begin(); ch != rhs.end(); ++ch) {
-			// If first part in production a non term, add it to firsts list
-			if (isNonTerminal(*ch)) {
-				if (*ch != "e") {
-					nextList.insert(*ch);
-					finished = true;
-					break;
-				}
-				continue;
+		for (int j = 0; j < productionTable.size(); j++) {
+			vector<string> production = productionTable[j];
+
+			firstPlusSet = firstPlus(firstTable[nonTerm], followTable[nonTerm]); // TODO: call firstPlus() with correct parameters
+			for (string item : firstPlusSet) {
+				parseTable[getTerm(j)][item] = j;
 			}
 
-			set<string> firstTableCopy(firstTable[*ch].begin(), firstTable[*ch].end());
-			if (firstTableCopy.find("e") == firstTableCopy.end()) {
-				nextList.insert(firstTableCopy.begin(), firstTableCopy.end());
-				finished = true;
-				break;
+			if (isInSet(firstPlusSet, "eof")) { // TODO: Do I need this? Is it handled above?
+				parseTable[getTerm(j)]["eof"] = j;
 			}
-			firstTableCopy.erase("e");
-			nextList.insert(firstTableCopy.begin(), firstTableCopy.end());
 		}
-		// If the whole rhs can be skipped through epsilon or reaching the end
-		// Add follow to next list
-		if (!finished) {
-			nextList.insert(followTable[getTerm(i)].begin(), followTable[getTerm(i)].end());
-		}
-
-
-		for (auto ch = nextList.begin(); ch != nextList.end(); ++ch) {
-			parseTable[getTerm(i)][productionTable[i][0]] = i;
-		}
-
 	}
+
+    /*
+	//for each nonterminal A do;
+	//	for each terminal w do;
+	//		Table[A, w] <- error;
+	//	end;
+	//	for each production p of the form A->B do;
+	//		for each terminal w in FIRST + (A->B) do;
+	//			Table[A, w] < -p;
+	//		end;
+	//		if eof in FIRST + (A→B)
+	//			then Table[A, eof] < -p;
+	//	end;
+	//end;
+	*/
+
+    std::cout << "\n\nParse Table\n";
+    for (string term : terminals) {
+            std::cout << "\t" << term;
+        }
+    std::cout << "\n";
+    for (string nonTerm : nonTerminals) {
+        std::cout << nonTerm << ":";
+        for (string term : terminals) {
+            std::cout << "\t" << parseTable[nonTerm][term];
+        }
+        std::cout << "\n";
+    }
 
 	return parseTable;
 }
@@ -523,22 +562,22 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 
 int main()
 {
-	// Read in files 
-	vector<string> file = readInFile("./valid.txt");
+	// // Read in files 
+	// vector<string> file = readInFile("./valid.txt");
 
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
 	map<string, map<string, int>> parseTable = createParseTable(productionTable);
 
-	for (string line : file) {
-		string passedStr = "invalid";
+// 	for (string line : file) {
+// 		string passedStr = "invalid";
 
-		// Perform the algorithm
-		if (checkLine(productionTable, parseTable, line))
-			passedStr = "valid";
+// 		// Perform the algorithm
+// 		if (checkLine(productionTable, parseTable, line))
+// 			passedStr = "valid";
 
-		std::cout << "(" << passedStr << "): " << line << "\n";
-	}
+// 		std::cout << "(" << passedStr << "): " << line << "\n";
+// 	}
 
 	return 0;
 }
