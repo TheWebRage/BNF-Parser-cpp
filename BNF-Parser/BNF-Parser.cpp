@@ -110,24 +110,48 @@ string getTerm(int productionNum) {
 		return "FACTOR";
 	case 11:
 		return "FACTOR";
+
+	// case 0:
+	// 	return "GOAL";
+	// case 1:
+	// 	return "EXPR";
+	// case 2:
+	// 	return "LTERM";
+	// case 3:
+	// 	return "RTERM";
+	// case 4:
+	// 	return "EXPRp";
+	// case 5:
+	// 	return "EXPRp";
+	// case 6:
+	// 	return "TERMp";
+	// case 7:
+	// 	return "TERMp";
+	// case 8:
+	// 	return "LFACTOR";
+	// case 9:
+	// 	return "LFACTOR";
+	// case 10:
+	// 	return "LFACTOR";
+	// case 11:
+	// 	return "RFACTOR";
+	// case 12:
+	// 	return "GFACTOR";
+	// case 13:
+	// 	return "GFACTOR";
+	// case 14:
+	// 	return "GFACTOR";
+	// case 15:
+	// 	return "POSVAL";
+	// case 16:
+	// 	return "POSVAL";
+	// case 17:
+	// 	return "SPACENEGVAL";
+	// case 18:
+	// 	return "SPACENEGVAL";
 	}
 
 	return "";
-}
-
-bool isProduction(string nonTerm, int productionNum) {
-	return ((nonTerm == "GOAL" && productionNum == 0)
-		|| (nonTerm == "EXPR" && productionNum == 1)
-		|| (nonTerm == "EXPRp" && productionNum == 2)
-		|| (nonTerm == "EXPRp" && productionNum == 3)
-		|| (nonTerm == "EXPRp" && productionNum == 4)
-		|| (nonTerm == "TERM" && productionNum == 5)
-		|| (nonTerm == "TERMp" && productionNum == 6)
-		|| (nonTerm == "TERMp" && productionNum == 7)
-		|| (nonTerm == "TERMp" && productionNum == 8)
-		|| (nonTerm == "FACTOR" && productionNum == 9)
-		|| (nonTerm == "FACTOR" && productionNum == 10)
-		|| (nonTerm == "FACTOR" && productionNum == 11));
 }
 
 bool isNonTerminal(string term) {
