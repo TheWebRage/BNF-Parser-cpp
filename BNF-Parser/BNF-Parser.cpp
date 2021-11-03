@@ -454,7 +454,21 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 }
 
 string getTermType(string word) {
-	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals))) {
+	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals)) || word[0] == '-') {
+		//if (word[0] == '-') {
+		//	if (std::isdigit(word[1])) {
+		//		for (int i = 0; i < word.size(); i++) {
+		//			if (i != 0 && !std::isdigit(word[i])) {
+		//				return "error";
+		//			}
+
+		//			return "name";
+		//		}
+		//	}
+
+		//	
+		//}
+
 		if (std::isdigit(word[0])) {
 
 			bool hasDecimal = false;
@@ -487,7 +501,7 @@ string getTermType(string word) {
 	return word;
 }
 
-string nextWord(string& line) {
+string nextWord(string& line, bool isNegVal = false) {
 	char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^'};
 	string word = "";
 	bool finished = false;
@@ -495,20 +509,31 @@ string nextWord(string& line) {
 	if (line.size() > 0 && !finished) {
 		word += line[0];
 
+		bool isTerm = false;
 		for (char term : keyTerms) {
-			if (word[0] == term) {
+			if (word[0] == term && !(word[0] == '-' && isNegVal)) {
+				isTerm = true;
 				finished = true;
 				break;
 			}
 		}
 
+		//if (!isTerm) {
+		//	if (word[0] != ' ') {
+		//		isNegVal = false;
+		//	}
+		//}
+
 		for (int i = 1; i < line.length() && !finished; i++) {
-			if (line[i] == ' ' && line[i - 1] != ' ')
+			if (line[i] == ' ' && line[i - 1] != ' ' && !(word[0] == '-' && isNegVal))
 				break;
 
 			for (char term : keyTerms) {
 
 				if (line[i] == term) {
+					if (line[i] == '-' && isNegVal)
+						break;
+
 					finished = true;
 
 					bool isAllSpace = true;
@@ -519,12 +544,14 @@ string nextWord(string& line) {
 						}
 					}
 
-					if (isAllSpace)
+					if (isAllSpace) {
 						word += line[i];
+					}
 
 					break;
 				}
 			}
+
 			if (!finished)
 				word += line[i];
 		}
@@ -535,7 +562,10 @@ string nextWord(string& line) {
 	while (word[0] == ' ') {
 		word.erase(0, 1);
 	}
-	// TODO: add in negatives
+
+	if (word[0] == '-') {
+		word.erase(std::remove_if(word.begin(), word.end(), isspace), word.end());
+	}
 
 	if (word == "")
 		word = "eof";
@@ -547,13 +577,14 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 	vector<string> stack;
 	string focus;
 
-	string word = nextWord(line);
+	string word = nextWord(line, true);
 	stack.push_back("eof");
 	stack.push_back("S");
 	focus = stack.back();
 
-
 	while (true) {
+		bool isNegVal = false;
+
 		if (focus == "eof" && word == "eof") {
 			// then report successand exit the loop;
 			return 1;
@@ -561,7 +592,8 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 		else if ((std::find(std::begin(terminals), std::end(terminals), focus) != std::end(terminals)) || focus == "eof") {
 			if (focus == getTermType(word)) {
 				stack.pop_back();
-				word = nextWord(line);
+				isNegVal = (focus == "-" || focus == "/" || focus == "*" || focus == "+" || focus == "(") && !(focus == ")" || focus == "name" || focus == "num");
+				word = nextWord(line, isNegVal);
 			}
 			else {
 				// else report an error looking for symbol at top of stack;
