@@ -19,7 +19,7 @@ using std::pair;
 
 // Modified Parts
 string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "LTERM", "RTERM", "TERMp", "LFACTOR", "RFACTOR", "GFACTOR", "POSVAL", "SPACENEGVAL" };
-string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
+string terminals[] = { "eof", "+", "-", "*", "/", "^", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
 
 
 vector<string> readInFile(string filePath) {
@@ -593,23 +593,20 @@ string nextWord(string& line, bool isNegVal = false) {
 	char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^'};
 	string word = "";
 	bool isAllSpace = true;
-	bool isFinished = false;
 	
 	// Get the next word
 	if (line.size() > 0) {
-	    while(!isFinished) {
+	    for (int i = 0; i < line.size(); i++) {
 	        char ch = line[0];
 	        
 	        if (ch == '-'){
 	            
 	            if (!isNegVal) {
-	                isFinished = true;
 	                break;
 	            }
 	            
 	        } else {
 	            if (isInArray(keyTerms, ch) && !isAllSpace) {
-	                isFinished = true;
 	                break;
 	            }
 	        }
@@ -620,25 +617,17 @@ string nextWord(string& line, bool isNegVal = false) {
 	       
 	        // If there has been a char and a space comes up, word is done
 	        } else if (!isAllSpace && ch == ' ') {
-                isFinished = true;
 	            break;
 	        }
 	        
-	        if (!isFinished)
-	            word += ch;
+	        word += ch;
 	    }
 	}
 	
 	// Remove word from line
 	line.erase(0, word.size());
 	
-	while (word[0] == ' ') {
-		word.erase(0, 1);
-	}
-
-	if (word[0] == '-') {
-		word.erase(std::remove_if(word.begin(), word.end(), isspace), word.end());
-	}
+	word.erase(std::remove_if(word.begin(), word.end(), isspace), word.end());
 
 	if (word == "")
 		word = "eof";
