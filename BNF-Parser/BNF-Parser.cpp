@@ -176,8 +176,24 @@ bool isNonTerminal(string term) {
 	return false;
 }
 
+bool isTerminal(string term) {
+	for (string terms : terminals) {
+		if (term == terms)
+			return true;
+	}
+	return false;
+}
+
 bool isInVector(vector<string> set1, string itemInSet) {
 	for (string item : set1) {
+		if (itemInSet == item)
+			return true;
+	}
+	return false;
+}
+
+bool isInArray(string set1, char itemInSet) {
+	for (char item : set1) {
 		if (itemInSet == item)
 			return true;
 	}
@@ -454,7 +470,7 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 }
 
 string getTermType(string word) {
-	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals)) || word[0] == '-') {
+	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals))) {
 		//if (word[0] == '-') {
 		//	if (std::isdigit(word[1])) {
 		//		for (int i = 0; i < word.size(); i++) {
@@ -502,7 +518,7 @@ string getTermType(string word) {
 }
 
 string nextWord(string& line, bool isNegVal = false) {
-	char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^'};
+	/*char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^'};
 	string word = "";
 	bool finished = false;
 
@@ -570,6 +586,63 @@ string nextWord(string& line, bool isNegVal = false) {
 	if (word == "")
 		word = "eof";
 
+	return word;*/
+	
+	// --------------------------------------------------- //
+	
+	char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^'};
+	string word = "";
+	bool isAllSpace = true;
+	bool isFinished = false;
+	
+	// Get the next word
+	if (line.size() > 0) {
+	    while(!isFinished) {
+	        char ch = line[0];
+	        
+	        if (ch == '-'){
+	            
+	            if (!isNegVal) {
+	                isFinished = true;
+	                break;
+	            }
+	            
+	        } else {
+	            if (isInArray(keyTerms, ch) && !isAllSpace) {
+	                isFinished = true;
+	                break;
+	            }
+	        }
+	        
+	        // Keep adding on all spaces at the beginning
+	        if (ch != ' ') {
+	            isAllSpace = false;
+	       
+	        // If there has been a char and a space comes up, word is done
+	        } else if (!isAllSpace && ch == ' ') {
+                isFinished = true;
+	            break;
+	        }
+	        
+	        if (!isFinished)
+	            word += ch;
+	    }
+	}
+	
+	// Remove word from line
+	line.erase(0, word.size());
+	
+	while (word[0] == ' ') {
+		word.erase(0, 1);
+	}
+
+	if (word[0] == '-') {
+		word.erase(std::remove_if(word.begin(), word.end(), isspace), word.end());
+	}
+
+	if (word == "")
+		word = "eof";
+	
 	return word;
 }
 
@@ -634,8 +707,8 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 
 int main()
 {
-	 // Read in files 
-	 vector<string> file = readInFile("./valid.txt"); // TODO: get working with negatives from ./valid.txt
+	// Read in files 
+	vector<string> file = readInFile("./valid.txt"); // TODO: get working with negatives from ./valid.txt
 
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
