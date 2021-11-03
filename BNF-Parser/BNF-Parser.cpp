@@ -14,12 +14,12 @@ using std::pair;
 
 // Terms and nonTerms - nonTerms are all caps(except for prime 'p'), terms are all lower
 // Book Parts
- string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "TERM", "TERMp", "FACTOR" };
- string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num" };
+//string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "TERM", "TERMp", "FACTOR" };
+//string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num" };
 
 // Modified Parts
-//string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "LTERM", "LTERMp", "RTERM", "RTERMp", "GFACTOR", "POSVAL", "SPACENEGVAL", "FACTOR" };
-//string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
+string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "LTERM", "RTERM", "TERMp", "LFACTOR", "RFACTOR", "GFACTOR", "POSVAL", "SPACENEGVAL" };
+string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
 
 
 vector<string> readInFile(string filePath) {
@@ -46,112 +46,126 @@ vector<vector<string>> createProductionTable() {
 	// Insert productions into structure
 
 	// Book Table
-	productionTable.push_back({ "EXPR" });
-	productionTable.push_back({ "TERM", "EXPRp" });
-	productionTable.push_back({ "+", "TERM", "EXPRp" });
-	productionTable.push_back({ "-", "TERM", "EXPRp" });
-	productionTable.push_back({ "e" });
-	productionTable.push_back({ "FACTOR", "TERMp" });
-	productionTable.push_back({ "*", "FACTOR", "TERMp" });
-	productionTable.push_back({ "/", "FACTOR", "TERMp" });
-	productionTable.push_back({ "e" });
-	productionTable.push_back({ "(", "EXPR", ")" });
-	productionTable.push_back({ "num" });
-	productionTable.push_back({ "name" });
+	//productionTable.push_back({ "EXPR" });
+	//productionTable.push_back({ "TERM", "EXPRp" });
+	//productionTable.push_back({ "+", "TERM", "EXPRp" });
+	//productionTable.push_back({ "-", "TERM", "EXPRp" });
+	//productionTable.push_back({ "e" });
+	//productionTable.push_back({ "FACTOR", "TERMp" });
+	//productionTable.push_back({ "*", "FACTOR", "TERMp" });
+	//productionTable.push_back({ "/", "FACTOR", "TERMp" });
+	//productionTable.push_back({ "e" });
+	//productionTable.push_back({ "(", "EXPR", ")" });
+	//productionTable.push_back({ "num" });
+	//productionTable.push_back({ "name" });
 
 		
 	// Modified Version
-	//productionTable.push_back({ "EXPR" });				// 0.   Goal ->Expr
-	//productionTable.push_back({ "LTERM", "EXPRp" });		// 1.   Expr ->LTerm Expr’
-	//productionTable.push_back({ "LFACTOR", "TERMp" });	// 2.   LTerm->LFactor Term’
-	//productionTable.push_back({ "LFACTOR", "TERMp" });	// 3.   RTerm->RFactor Term’
-	//productionTable.push_back({ "+", "RTERM", "EXPRp" });	// 4.   Expr’-> + RTerm Expr’
-	//productionTable.push_back({ "-", "RTERM", "EXPRp" });	// 5.         | - RTerm Expr’
-	//productionTable.push_back({ "*", "RTERM", "EXPRp" });	// 7.   Term’-> * RTerm Expr’
-	//productionTable.push_back({ "/", "RTERM", "EXPRp" });	// 8.         | / RTerm Expr’
-	//productionTable.push_back({ "GFACTOR" });				// 10. LFactor->GFactor
-	//productionTable.push_back({ "negnum" });				// 11.        | negnum    //negative val without space only left term 
-	//productionTable.push_back({ "negname" });				// 12.        | negname   //negative name without space only left term 
-	//productionTable.push_back({ "GFACTOR" });				// 13. RFactor->GFactor
-	//productionTable.push_back({ "(", "EXPR", ")" });		// 14. GFactor-> (Expr)
-	//productionTable.push_back({ "POSVAL" });				// 15.        | PosVal
-	//productionTable.push_back({ "SPACENEGVAL" });			// 16.        | SpaceNegVal
-	//productionTable.push_back({ "num" });					// 17. PosVal->num
-	//productionTable.push_back({ "name" });				// 18.        | name
-	//productionTable.push_back({ "spacenegnum" });			// 19. SpaceNegVal->spacenegnum
-	//productionTable.push_back({ "spacenegname" });		// 20.        | spacenegname
+	productionTable.push_back({ "EXPR" });					// 0.   Goal ->Expr
+	productionTable.push_back({ "LTERM", "EXPRp" });		// 1.   Expr ->LTerm Expr’
+	productionTable.push_back({ "LFACTOR", "TERMp" });		// 2.   LTerm->LFactor Term’
+	productionTable.push_back({ "RFACTOR", "TERMp" });		// 3.   RTerm->RFactor Term’
+	productionTable.push_back({ "+", "RTERM", "EXPRp" });	// 4.   Expr’-> + RTerm Expr’
+	productionTable.push_back({ "-", "RTERM", "EXPRp" });	// 5.         | - RTerm Expr’
+	productionTable.push_back({ "e" });						// 6.         | e
+	productionTable.push_back({ "*", "RTERM", "TERMp" });	// 7.   Term’-> * RTerm Term’
+	productionTable.push_back({ "/", "RTERM", "TERMp" });	// 8.         | / RTerm Term’
+	productionTable.push_back({ "e" });						// 9.         | e
+	productionTable.push_back({ "GFACTOR" });				// 10. LFactor->GFactor
+	productionTable.push_back({ "negnum" });				// 11.        | negnum    //negative val without space only left term 
+	productionTable.push_back({ "negname" });				// 12.        | negname   //negative name without space only left term 
+	productionTable.push_back({ "GFACTOR" });				// 13. RFactor->GFactor
+	productionTable.push_back({ "(", "EXPR", ")" });		// 14. GFactor-> (Expr)
+	productionTable.push_back({ "POSVAL" });				// 15.        | PosVal
+	productionTable.push_back({ "SPACENEGVAL" });			// 16.        | SpaceNegVal
+	productionTable.push_back({ "num" });					// 17. PosVal->num
+	productionTable.push_back({ "name" });					// 18.        | name
+	productionTable.push_back({ "spacenegnum" });			// 19. SpaceNegVal->spacenegnum
+	productionTable.push_back({ "spacenegname" });			// 20.        | spacenegname
 
 	return productionTable;
 }
 
 string getTerm(int productionNum) {
 	switch (productionNum) {
-	case 0:
-		return "GOAL";
-	case 1:
-		return "EXPR";
-	case 2:
-		return "EXPRp";
-	case 3:
-		return "EXPRp";
-	case 4:
-		return "EXPRp";
-	case 5:
-		return "TERM";
-	case 6:
-		return "TERMp";
-	case 7:
-		return "TERMp";
-	case 8:
-		return "TERMp";
-	case 9:
-		return "FACTOR";
-	case 10:
-		return "FACTOR";
-	case 11:
-		return "FACTOR";
+	//case 0:
+	//	return "GOAL";
+	//case 1:
+	//	return "EXPR";
+	//case 2:
+	//	return "EXPRp";
+	//case 3:
+	//	return "EXPRp";
+	//case 4:
+	//	return "EXPRp";
+	//case 5:
+	//	return "TERM";
+	//case 6:
+	//	return "TERMp";
+	//case 7:
+	//	return "TERMp";
+	//case 8:
+	//	return "TERMp";
+	//case 9:
+	//	return "FACTOR";
+	//case 10:
+	//	return "FACTOR";
+	//case 11:
+	//	return "FACTOR";
 
-	// case 0:
-	// 	return "GOAL";
-	// case 1:
-	// 	return "EXPR";
-	// case 2:
-	// 	return "LTERM";
-	// case 3:
-	// 	return "RTERM";
-	// case 4:
-	// 	return "EXPRp";
-	// case 5:
-	// 	return "EXPRp";
-	// case 6:
-	// 	return "TERMp";
-	// case 7:
-	// 	return "TERMp";
-	// case 8:
-	// 	return "LFACTOR";
-	// case 9:
-	// 	return "LFACTOR";
-	// case 10:
-	// 	return "LFACTOR";
-	// case 11:
-	// 	return "RFACTOR";
-	// case 12:
-	// 	return "GFACTOR";
-	// case 13:
-	// 	return "GFACTOR";
-	// case 14:
-	// 	return "GFACTOR";
-	// case 15:
-	// 	return "POSVAL";
-	// case 16:
-	// 	return "POSVAL";
-	// case 17:
-	// 	return "SPACENEGVAL";
-	// case 18:
-	// 	return "SPACENEGVAL";
+	 case 0:
+	 	return "GOAL";				// 0.   Goal ->Expr
+	 case 1:
+	 	return "EXPR";				// 1.   Expr ->LTerm Expr’
+	 case 2:
+	 	return "LTERM";				// 2.   LTerm->LFactor Term’			
+	 case 3:									
+		 return "RTERM";			// 3.   RTerm->RFactor Term’			
+	 case 4:									
+		 return "EXPRp";			// 4.   Expr’-> + RTerm Expr’			
+	 case 5:
+		 return "EXPRp";			// 5.         | - RTerm Expr’			
+	 case 6:
+		 return "EXPRp";			// 6.         | e			
+	 case 7:							
+		 return "TERMp";			// 7.   Term’-> * RTerm Term’	
+	 case 8:
+		 return "TERMp";			// 8.         | / RTerm Term’
+	 case 9:
+		 return "TERMp";			// 9.         | e
+	 case 10:							
+		 return "LFACTOR";			// 10. LFactor->GFactor
+	 case 11:							
+		 return "LFACTOR";			// 11.        | negnum    //negative val without space only left term 	
+	 case 12:								
+		 return "LFACTOR";			// 12.        | negname   //negative name without space only left term	
+	 case 13:							
+		 return "RFACTOR";			// 13. RFactor->GFactor	
+	 case 14:
+	 	return "GFACTOR";			// 14. GFactor-> (Expr)
+	 case 15:
+	 	return "GFACTOR";			// 15.        | PosVal
+	 case 16:
+	 	return "GFACTOR";			// 16.        | SpaceNegVal
+	 case 17:
+	 	return "POSVAL";			// 17. POSVAL -> | num
+	 case 18:
+	 	return "POSVAL";			// 18.           | name
+	 case 19:
+	 	return "SPACENEGVAL";		// 19. SpaceNegVal->spacenegnum
+	 case 20:
+	 	return "SPACENEGVAL";		// 20.        | spacenegname
 	}
 
 	return "";
+}
+
+int getNonTermStart(string term, vector<vector<string>> productionTable) {
+	for (int i = 0; i < productionTable.size(); i++) {
+		if (getTerm(i) == term)
+			return i;
+	}
+	return 0;
 }
 
 bool isNonTerminal(string term) {
@@ -162,7 +176,7 @@ bool isNonTerminal(string term) {
 	return false;
 }
 
-bool isInSet(set<string> set1, string itemInSet) {
+bool isInVector(vector<string> set1, string itemInSet) {
 	for (string item : set1) {
 		if (itemInSet == item)
 			return true;
@@ -291,10 +305,11 @@ void follow(vector< vector<string> > productionTable, map< string, set<string> >
 
 }
 
-set<string> firstPlus(set<string> firstSet, set<string> followSet) {
+set<string> firstPlus(string productionPart, set<string> firstSet, set<string> followSet) {
 	// // if e in first() then first()
 	// // else first() and follow()
-	if (!isInSet(firstSet, "e")) {
+
+	if (productionPart == "e") {
 		firstSet = unionSets(firstSet, followSet);
 	}
 
@@ -349,60 +364,61 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 	map< string, set<string> > firstTable;
 	first(productionTable, firstTable);
 
-    std::cout << "First:\n";
-    for (string term : terminals) {
-        std::cout << term << ": ";
-        for (string item : firstTable[term])
-            std::cout << item << " ";
-        
-        std::cout << "\n";
-    }
-    for (string nonTerm : nonTerminals) {
-        std::cout << nonTerm << ": ";
-        for (string item : firstTable[nonTerm])
-            std::cout << item << " ";
-        
-        std::cout << "\n";
-    }
+    //std::cout << "First:\n";
+    //for (string term : terminals) {
+    //    std::cout << term << ": ";
+    //    for (string item : firstTable[term])
+    //        std::cout << item << " ";
+    //    
+    //    std::cout << "\n";
+    //}
+    //for (string nonTerm : nonTerminals) {
+    //    std::cout << nonTerm << ": ";
+    //    for (string item : firstTable[nonTerm])
+    //        std::cout << item << " ";
+    //    
+    //    std::cout << "\n";
+    //}
 
 	map< string, set<string> > followTable;
 	follow(productionTable, followTable, firstTable);
 	
-    std::cout << "\n\nFollow:\n";
-    for (string term : terminals) {
-        std::cout << term << ": ";
-        for (string item : followTable[term])
-            std::cout << item << " ";
-        
-        std::cout << "\n";
-    }
-    for (string nonTerm : nonTerminals) {
-        std::cout << nonTerm << ": ";
-        for (string item : followTable[nonTerm])
-            std::cout << item << " ";
-        
-        std::cout << "\n";
-    }
+    //std::cout << "\n\nFollow:\n";
+    //for (string term : terminals) {
+    //    std::cout << term << ": ";
+    //    for (string item : followTable[term])
+    //        std::cout << item << " ";
+    //    
+    //    std::cout << "\n";
+    //}
+    //for (string nonTerm : nonTerminals) {
+    //    std::cout << nonTerm << ": ";
+    //    for (string item : followTable[nonTerm])
+    //        std::cout << item << " ";
+    //    
+    //    std::cout << "\n";
+    //}
 	
 	set<string> firstPlusSet;
 	
 	for (string nonTerm : nonTerminals) {
+		// Init parseTable to -1
 		for (string term : terminals) {
-			// Init parseTable to -1
 			parseTable[nonTerm][term] = -1;
 		}
 
-		for (int j = 0; j < productionTable.size(); j++) {
+		for (int j = getNonTermStart(nonTerm, productionTable); j < productionTable.size(); j++) {
 			vector<string> production = productionTable[j];
 
-			firstPlusSet = firstPlus(firstTable[getTerm(j)], followTable[getTerm(j)]); // TODO: call firstPlus() with correct parameters
+			if (getTerm(j) != nonTerm)
+				break;
+
+			firstPlusSet = firstPlus(production[0], firstTable[production[0]], followTable[getTerm(j)]);
 			for (string item : firstPlusSet) {
-				parseTable[getTerm(j)][item] = j;
+				if (parseTable[getTerm(j)][item] == -1)
+					parseTable[getTerm(j)][item] = j;
 			}
 
-			if (isInSet(firstPlusSet, "eof")) { // TODO: Do I need this? Is it handled above?
-				parseTable[getTerm(j)]["eof"] = j;
-			}
 		}
 	}
 
@@ -421,18 +437,18 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 	//end;
 	*/
 
-    std::cout << "\n\nParse Table\n";
-    for (string term : terminals) {
-            std::cout << "\t" << term;
-        }
-    std::cout << "\n";
-    for (string nonTerm : nonTerminals) {
-        std::cout << nonTerm << ":";
-        for (string term : terminals) {
-            std::cout << "\t" << parseTable[nonTerm][term];
-        }
-        std::cout << "\n";
-    }
+    //std::cout << "\n\nParse Table\n";
+    //for (string term : terminals) {
+    //        std::cout << "\t" << term;
+    //    }
+    //std::cout << "\n";
+    //for (string nonTerm : nonTerminals) {
+    //    std::cout << nonTerm << ":";
+    //    for (string term : terminals) {
+    //        std::cout << "\t" << parseTable[nonTerm][term];
+    //    }
+    //    std::cout << "\n";
+    //}
 
 	return parseTable;
 }
@@ -586,22 +602,22 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 
 int main()
 {
-	// // Read in files 
-	// vector<string> file = readInFile("./valid.txt");
+	 // Read in files 
+	 vector<string> file = readInFile("./valid.txt");
 
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
 	map<string, map<string, int>> parseTable = createParseTable(productionTable);
 
-// 	for (string line : file) {
-// 		string passedStr = "invalid";
+ 	for (string line : file) {
+ 		string passedStr = "invalid";
 
-// 		// Perform the algorithm
-// 		if (checkLine(productionTable, parseTable, line))
-// 			passedStr = "valid";
+ 		// Perform the algorithm
+ 		if (checkLine(productionTable, parseTable, line))
+ 			passedStr = "valid";
 
-// 		std::cout << "(" << passedStr << "): " << line << "\n";
-// 	}
+ 		std::cout << "(" << passedStr << "): " << line << "\n";
+ 	}
 
 	return 0;
 }
