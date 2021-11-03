@@ -635,7 +635,7 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 int main()
 {
 	 // Read in files 
-	 vector<string> file = readInFile("./valid.txt");
+	 vector<string> file = readInFile("./valid.txt"); // TODO: get working with negatives from ./valid.txt
 
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
