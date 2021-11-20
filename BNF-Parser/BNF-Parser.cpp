@@ -679,7 +679,7 @@ string nextWord(string line, bool isNegVal = false) {
 	}
 }
 
-int checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line) {
+string checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line) {
 	vector<string> stack;
 	string focus;
 
@@ -696,7 +696,7 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 
 		if (focus == "eof" && word == "eof") {
 			// then report successand exit the loop;
-			return 1;
+			return "Success";
 		}
 		else if ((std::find(std::begin(terminals), std::end(terminals), focus) != std::end(terminals)) || focus == "eof") {
 			if (focus == getTermType(word)) {
@@ -723,11 +723,14 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 				int productionNum = parseTable[focus][termType];
 
 				if (productionNum == -1 || termType == "error")
-					return 0;
+					return "ERROR";
 
 				vector<string> curProduction = productionTable[productionNum];
 
 				if (!curProduction.empty()) {
+					if (stack.back() == curProduction.front())
+						return "ERROR";
+
 					stack.pop_back();
 					for (int i = curProduction.size() - 1; i >= 0; i--) {
 						if (curProduction[i] != "e") {
@@ -738,11 +741,11 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 				}
 				else {
 					// report an error expanding focus;
-					return 0;
+					return "ERROR";
 				}
 			}
 			catch (int ex) {
-				return 0;
+				return "ERROR";
 			}
 		}
 
@@ -753,25 +756,159 @@ int checkLine(vector<vector<string>> productionTable, map<string, map<string, in
 	}
 }
 
-int main()
-{
+//int main()
+//{
+//	// Read in files 
+//	vector<string> file = readInFile("./valid.txt");
+//
+//	// Create structures for the algorithm
+//	vector<vector<string>> productionTable = createProductionTable();
+//	map<string, map<string, int>> parseTable = createParseTable(productionTable);
+//
+//	for (string line : file) {
+//		string passedStr = "invalid";
+//
+//		// Perform the algorithm
+//		if (checkLine(productionTable, parseTable, line))
+//			passedStr = "valid";
+//
+//		std::cout << "(" << passedStr << "): " << line << "\n";
+//	}
+//
+//	return 0;
+//}
+
+
+
+
+
+int performMath(string line) {
+
+	// Use other file as template // TODO:
+	// - Save onto stack
+		// if operation
+			// Pop last two values and perform operation
+			// - Save value onto stack
+
+	// Save value onto reference value
+	// Return true / false // TODO:
+	// - if operation returned successfully
+	return 0;
+}
+
+string getNextSectionWord(string& line) {
+	string word = "";
+
+	for (int i = 0; i < line.size(); i++) {
+		// Make sure the ' ' is at the end of the word to break
+		if (line[i] == ' ' && word.size() > 0) {
+			break;
+		}
+
+		// Add the keyTerm before breaking (It should be the only thing in the word)
+		if (line[i] == '(' || line[i] == ')' || line[i] == ',' || line[i] == '}') {
+			// Only add if there is not another letter
+			if (word.size() == 0)
+				word += line[i];
+
+			break;
+		}
+
+		word += line[i];
+	}
+
+	line.erase(0, word.size());
+
+	for (int i = 0; i < word.size(); i++) {
+		if (word[i] == ' ') {
+			word.erase(i, i + 1);
+		}
+	}
+
+	return word;
+}
+
+struct ProcedureParameter {
+	string varType;
+	string varName;
+};
+
+struct Procedure {
+	string returnType;
+	string name;
+	vector<ProcedureParameter> parameters;
+};
+
+int main() {
 	// Read in files 
-	vector<string> file = readInFile("./valid.txt");
+	vector<string> file = readInFile("./ir.txt");
 
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
 	map<string, map<string, int>> parseTable = createParseTable(productionTable);
 
+	// Keep track of variables
+	map<string, string> variables;
+	vector<Procedure> procedures;
+
 	for (string line : file) {
-		string passedStr = "invalid";
+		int strAnswer;
 
-		// Perform the algorithm
-		if (checkLine(productionTable, parseTable, line))
-			passedStr = "valid";
+		// TODO: check if line has correct syntax?
 
-		std::cout << "(" << passedStr << "): " << line << "\n";
+		// if the word procedure(with space after) is the first word in the line
+		// - and the first word is an right type
+		string type = getNextSectionWord(line);
+		string variableName = getNextSectionWord(line);
+
+		// Procedures from line
+		if (variableName == "procedure") {
+			// - and the last is a "{"
+			Procedure newProcedure; 
+			newProcedure.name = getNextSectionWord(line);
+			newProcedure.returnType = type;
+
+			string parameterVar = getNextSectionWord(line);
+			// Loop over parameters
+			if (parameterVar == "(") {
+				while (parameterVar != ")" && line[0] != ')') {
+					ProcedureParameter newParameter;
+
+					newParameter.varType = getNextSectionWord(line);
+					newParameter.varName = getNextSectionWord(line);
+					parameterVar = getNextSectionWord(line);
+
+					newProcedure.parameters.push_back(newParameter);
+				}
+			}
+
+			// save map to the math operation
+			// - and the expected parameters
+			procedures.push_back(newProcedure);
+
+			// continue to the next line
+			continue;
+		}
+		else {
+			string equalsignString = getNextSectionWord(line);
+
+			if (equalsignString == "=") {
+				pair<string, string> variable;
+				variable.first = variableName;
+				variable.second = checkLine(productionTable, parseTable, line); // Crashes on var20
+				variables.insert(variable);
+			}
+		}
+
+		// Perform the algorithm TODO:
+		// - if not a procedure
+		strAnswer = performMath(line);
+
+		// Save math operation into variable TODO:
+
+		std::cout << line << " => " << strAnswer;
 	}
+
 
 	return 0;
 }
-

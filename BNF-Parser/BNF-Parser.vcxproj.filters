@@ -18,12 +18,18 @@
     <ClCompile Include="BNF-Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="invalid.txt">
       <Filter>Source Files</Filter>
     </Text>
     <Text Include="valid.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="ir.txt">
       <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>
