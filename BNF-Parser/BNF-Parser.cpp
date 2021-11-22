@@ -22,6 +22,8 @@ using std::pair;
 string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "LTERM", "RTERM", "TERMp", "LFACTOR", "RFACTOR", "GFACTOR", "POSVAL", "SPACENEGVAL" };
 string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
 
+// Operators
+string operators[] = {"+", "-", "*", "/", "^"};
 
 vector<string> readInFile(string filePath) {
 	vector<string> lines;
@@ -41,7 +43,7 @@ vector<string> readInFile(string filePath) {
 	return lines;
 }
 
-vector<vector<string>> createProductionTable() {
+vector<vector<string>> createProductionTable() { // TODO: add in new production table
 	vector<vector<string>> productionTable;
 
 	// Insert productions into structure
@@ -679,7 +681,40 @@ string nextWord(string line, bool isNegVal = false) {
 	}
 }
 
-string checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line) {
+class Node {
+    public:
+    
+	string value = "";
+
+	Node* child1;
+	Node* child2;
+};
+
+void addToTree(Node* root, string word) {
+
+	Node* newNode = new Node();
+    newNode->value = word;
+
+	// If word is an operator - place in parent node; move to said parent node
+	if (word == "+" || word == "-" || word == "*" || word == "/" || word == "^") {
+		newNode->child1 = root;
+		root = newNode;
+	} else {
+		// else if word is not an operator - place into child node or first node if tree is empty
+			// add word to child node
+		if (root == nullptr) { // TODO: is this working?
+			// Create first node
+			root = newNode;
+		} else if (root->child1 == nullptr) {
+			root->child1 = newNode;
+		} else {
+			root->child2 = newNode;
+		}
+		
+	}
+}
+
+string checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root) {
 	vector<string> stack;
 	string focus;
 
@@ -696,10 +731,16 @@ string checkLine(vector<vector<string>> productionTable, map<string, map<string,
 
 		if (focus == "eof" && word == "eof") {
 			// then report successand exit the loop;
-			return "Success";
+			return "Success"; // TODO: return the actual end value of the stack
 		}
 		else if ((std::find(std::begin(terminals), std::end(terminals), focus) != std::end(terminals)) || focus == "eof") {
 			if (focus == getTermType(word)) {
+			    
+				// If not elipson
+				if (word != "e") {
+					addToTree(root, word);
+				} 
+			    
 				stack.pop_back();
 				word = nextWord(line, isNegVal);
 				if (line[0] == ' ')
@@ -839,6 +880,49 @@ struct Procedure {
 	vector<ProcedureParameter> parameters;
 };
 
+int operate(int val1, int val2, string selfValue) {
+    if (selfValue == "+") 
+		return val1 + val2;
+    if (selfValue == "-") 
+		return val1 - val2;
+    if (selfValue == "*") 
+		return val1 * val2;
+    if (selfValue == "/") 
+		return val1 / val2;
+    if (selfValue == "^") {
+		int value = 1;
+		for (int i = 0; i < val2; i++) 
+			value *= val1;
+		return value;
+    }
+	
+	
+	return std::stoi(selfValue); // TODO: does this work?
+			// TODO: check if selfValue is an int, if so return it
+			// - else if selfValue is in the variables list, return the value assigned to that
+}
+
+int nestNode(Node* curNode) {
+	// TODO: return ERROR if bad operation
+
+	int val1, val2;
+
+	// Reverse order operation
+	if (curNode->child1 != nullptr)
+		val1 = nestNode(curNode->child1);
+	if (curNode->child2 != nullptr)
+		val2 = nestNode(curNode->child2);
+	
+	return operate(val1, val2, curNode->value);// TODO: does this work?
+}
+
+int performCalc(Node* root) {
+	if (root != nullptr)
+		return nestNode(root);
+	else
+		return 0;
+}
+
 int main() {
 	// Read in files 
 	vector<string> file = readInFile("./ir.txt");
@@ -846,6 +930,8 @@ int main() {
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
 	map<string, map<string, int>> parseTable = createParseTable(productionTable);
+
+	Node* root = nullptr;
 
 	// Keep track of variables
 	map<string, string> variables;
@@ -893,16 +979,25 @@ int main() {
 			string equalsignString = getNextSectionWord(line);
 
 			if (equalsignString == "=") {
+				string isPassing = checkLine(productionTable, parseTable, line, root);
+				int value;
+
+				if (isPassing == "ERROR") {
+					// TODO: do something if there was an error
+				} else {
+					value = performCalc(root);
+				}
+
 				pair<string, string> variable;
 				variable.first = variableName;
-				variable.second = checkLine(productionTable, parseTable, line); // Crashes on var20
+				variable.second = value; // Crashes on var20
 				variables.insert(variable);
 			}
 		}
 
 		// Perform the algorithm TODO:
 		// - if not a procedure
-		strAnswer = performMath(line);
+		// strAnswer = performMath(line);
 
 		// Save math operation into variable TODO:
 
