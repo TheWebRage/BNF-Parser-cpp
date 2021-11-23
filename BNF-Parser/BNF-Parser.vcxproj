@@ -154,7 +154,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BNF-Parser.cpp" />
-    <ClCompile Include="IR.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="invalid.txt" />

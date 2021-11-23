@@ -15,15 +15,17 @@ using std::pair;
 
 // Terms and nonTerms - nonTerms are all caps(except for prime 'p'), terms are all lower
 // Book Parts
-//string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "TERM", "TERMp", "FACTOR" };
-//string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num" };
+// string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "TERM", "TERMp", "FACTOR" };
+// string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num" };
 
-// Modified Parts
-string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "LTERM", "RTERM", "TERMp", "LFACTOR", "RFACTOR", "GFACTOR", "POSVAL", "SPACENEGVAL" };
-string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
+//// Modified Parts
+// string nonTerminals[] = { "GOAL", "EXPR", "EXPRp", "LTERM", "RTERM", "TERMp", "LFACTOR", "RFACTOR", "GFACTOR", "POSVAL", "SPACENEGVAL" };
+// string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
 
-// Operators
-string operators[] = {"+", "-", "*", "/", "^"};
+// IR Version
+string nonTerminals[] = {"GOAL", "LINEFULL", "VARTYPEAFTER", "LINEVARNAME", "LINEVARNAMEREMAINING", "PROCEDUREPARAMS", "PARAMS", "MOREPARAMS", "VARTYPE", "EXPR", "LTERMADDSUB", "LTERMMULTDIV", "RTERMMULTDIV", "RTERMADDSUB", "ADDSUBp", "MULTDIVp", "MULTANDRIGHTOP", "DIVANDRIGHTOP", "POWERp", "POWERANDRIGHTOP", "LTERMPOWER", "RTERMPOWER", "GTERM", "PARENS", "POSVAL", "SPACENEGVAL"};
+string terminals[] = {"eof", "+", "-", "*", "/", "=", "(", ")", "^", "num", "name", "negnum", "negname", "spacenegnum", "spacenegname", "{", "}", ",", "ish", "result", "procedure", "e"};
+string operators[] = { "+", "-", "*", "/", "^" };
 
 vector<string> readInFile(string filePath) {
 	vector<string> lines;
@@ -98,7 +100,6 @@ vector<vector<string>> createProductionTable() { // TODO: add in new production 
 	productionTable.push_back({ "LINEVARNAME" });
 	productionTable.push_back({ "procedure", "name", "PROCEDUREPARAMS", "{" });
 	productionTable.push_back({ "name", "LINEVARNAMEREMAINING" });
-	productionTable.push_back({ "=", "LINEVARNAMEREMAINING" });
 	productionTable.push_back({ "=", "EXPR" });
 	productionTable.push_back({ "POWERANDRIGHTOP", "MULTDIVp", "ADDSUBp" });
 	productionTable.push_back({ "MULTANDRIGHTOP", "ADDSUBp" });
@@ -122,9 +123,6 @@ vector<vector<string>> createProductionTable() { // TODO: add in new production 
 	productionTable.push_back({ "MULTANDRIGHTOP" });
 	productionTable.push_back({ "DIVANDRIGHTOP" });
 	productionTable.push_back({ "e" });
-	productionTable.push_back({ "MULTANDRIGHTOP" });
-	productionTable.push_back({ "DIVANDRIGHTOP" });
-	productionTable.push_back({ "e" });
 	productionTable.push_back({ "*", "RTERMMULTDIV", "MULTDIVp" });
 	productionTable.push_back({ "/", "RTERMMULTDIV", "MULTDIVp" });
 	productionTable.push_back({ "POWERANDRIGHTOP" });
@@ -138,8 +136,8 @@ vector<vector<string>> createProductionTable() { // TODO: add in new production 
 	productionTable.push_back({ "POSVAL" });
 	productionTable.push_back({ "SPACENEGVAL" });
 	productionTable.push_back({ "(", "EXPR", ")" });
-	productionTable.push_back({ "num_val" });
-	productionTable.push_back({ "name_val" });
+	productionTable.push_back({ "num" });
+	productionTable.push_back({ "name" });
 	productionTable.push_back({ "spacenegnum" });
 	productionTable.push_back({ "spacenegname" });
 
@@ -629,7 +627,7 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 	//end;
 	*/
 
-	//std::cout << "\n\nParse Table\n";
+	//std::cout << "\n\nParse Table\n\t\t";
 	//for (string term : terminals) {
 	//        std::cout << "\t" << term;
 	//    }
@@ -646,7 +644,7 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 }
 
 string getTermType(string word) {
-	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals))) {
+	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals))) { // TODO: get ish types working with this
 
 		if (std::regex_match(word, std::regex("[0-9]+.?[0-9]*")))
 			return "num";
@@ -848,9 +846,60 @@ class Node {
 	Node* child2;
 };
 
-void addToTree(Node* root, string word) {
+struct variable {
+public:
+	string type;
+	string name;
+	int value;
+
+	Node* root;
+};
+
+class SymbolTable {
+private:
+	vector<variable> variables;
+
+public:
+	int Lookup(string name) {
+		for (variable variable : variables) {
+			if (variable.name == name)
+				return variable.value;
+		}
+		return 0;
+	}
+
+	bool Insert(string name, int value) {
+		try {
+			variable variable;
+			variable.name = name;
+			variable.value = value;
+
+			variables.push_back(variable);
+			return true;
+		}
+		catch (std::exception& e) {
+			return false;
+		}
+	}
+};
+
+void addToTree(Node*& root, string word, vector<variable>& variables) {
 
 	Node* newNode = new Node();
+	int intValue = 0;
+	
+	try {
+		intValue = std::stoi(word);
+	}
+	catch (std::exception e) {
+		for (variable var : variables) {
+			if (var.name == word) {
+				intValue = var.value;
+				break;
+			}
+		}
+	}
+
     newNode->value = word;
 
 	// If word is an operator - place in parent node; move to said parent node
@@ -860,19 +909,24 @@ void addToTree(Node* root, string word) {
 	} else {
 		// else if word is not an operator - place into child node or first node if tree is empty
 			// add word to child node
-		if (root == nullptr) { // TODO: is this working?
+		if (root == nullptr) {
 			// Create first node
 			root = newNode;
-		} else if (root->child1 == nullptr) {
-			root->child1 = newNode;
+		} else if (root->value == "") {
+			root = newNode;
 		} else {
-			root->child2 = newNode;
+			if (root->child1 == nullptr) {
+				root->child1 = newNode; // Theoretically it should never get here
+			}
+			else {
+				root->child2 = newNode;
+			}
 		}
 		
 	}
 }
 
-bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root) {
+bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables) {
 	vector<string> stack;
 	string focus;
 
@@ -894,10 +948,20 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 		else if ((std::find(std::begin(terminals), std::end(terminals), focus) != std::end(terminals)) || focus == "eof") {
 			if (focus == getTermType(word)) {
 			    
+				// If type declaring for a variable
+				if (stack[1] == "VARTYPEAFTER") { //  && (focus == "num" || focus == "ish")
+					var.type = word;
+				}
+				else if (stack[1] == "LINEVARNAMEREMAINING") { //  && (focus == "num" || focus == "ish")
+					var.name = word;
+				}
+
 				// If not elipson
-				if (word != "e") {
-					addToTree(root, word);
+				else if (word != "e" && word != "=" && word != "(" && word != ")" && word != "{" && word != "}" && word != ",") {
+					addToTree(root, word, variables);
 				} 
+
+				// If word is name for variable
 			    
 				stack.pop_back();
 				word = nextWord(line, isNegVal);
@@ -962,8 +1026,12 @@ int operate(int val1, int val2, string selfValue) {
 		return val1 - val2;
 	if (selfValue == "*")
 		return val1 * val2;
-	if (selfValue == "/")
+	if (selfValue == "/") {
+		if (val2 == 0)
+			throw std::exception();
+
 		return val1 / val2;
+	}
 	if (selfValue == "^") {
 		int value = 1;
 		for (int i = 0; i < val2; i++)
@@ -980,9 +1048,10 @@ int operate(int val1, int val2, string selfValue) {
 int nestNode(Node* curNode) {
 	// TODO: return ERROR if bad operation
 
-	int val1, val2;
+	int val1 = 0;
+	int val2 = 0;
 
-	// Reverse order operation
+	// Reverse order operation // TODO: This does not traverse the order correctly
 	if (curNode->child1 != nullptr)
 		val1 = nestNode(curNode->child1);
 	if (curNode->child2 != nullptr)
@@ -992,10 +1061,15 @@ int nestNode(Node* curNode) {
 }
 
 int performCalc(Node* root) {
-	if (root != nullptr)
-		return nestNode(root);
-	else
+	try {
+		if (root != nullptr)
+			return nestNode(root);
+		else
+			return 0;
+	}
+	catch (std::exception e) {
 		return 0;
+	}
 }
 
 int main()
@@ -1006,16 +1080,40 @@ int main()
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
 	map<string, map<string, int>> parseTable = createParseTable(productionTable);
-	Node* root = new Node();
+
+	// Keep track of the IR
+	vector < variable > variables;
+	
 
 	for (string line : file) {
+		// Skip lines with comments
+		if (line[0] == '/' && line[1] == '/') {
+			std::cout << line << "\n";
+			continue;
+		}
+
 		string passedStr = "invalid";
+		
+		// Keeps track of the values in a tree
+		Node* root = new Node();
+		variable var;
 
 		// Perform the algorithm
-		if (checkLine(productionTable, parseTable, line, root))
+		if (checkLine(productionTable, parseTable, line, root, var, variables)) {
 			passedStr = "valid";
 
+			// Perform Math operation on line using post-order traversal and save into variables
+			var.value = performCalc(root);
+			var.root = root;
+			variables.push_back(var);
+		}
+			
 		std::cout << "(" << passedStr << "): " << line << "\n";
+	}
+
+	std::cout << "\n\nVariables\n";
+	for (variable var : variables) {
+		std::cout << var.type << " " << var.name << " = " << var.value << "\n";
 	}
 
 	return 0;
