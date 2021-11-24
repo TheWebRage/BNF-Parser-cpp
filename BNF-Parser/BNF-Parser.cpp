@@ -26,6 +26,7 @@ using std::pair;
 string nonTerminals[] = {"GOAL", "LINEFULL", "VARTYPEAFTER", "LINEVARNAME", "LINEVARNAMEREMAINING", "PROCEDUREPARAMS", "PARAMS", "MOREPARAMS", "VARTYPE", "EXPR", "LTERMADDSUB", "LTERMMULTDIV", "RTERMMULTDIV", "RTERMADDSUB", "ADDSUBp", "MULTDIVp", "MULTANDRIGHTOP", "DIVANDRIGHTOP", "POWERp", "POWERANDRIGHTOP", "LTERMPOWER", "RTERMPOWER", "GTERM", "PARENS", "POSVAL", "SPACENEGVAL"};
 string terminals[] = {"eof", "+", "-", "*", "/", "=", "(", ")", "^", "num", "name", "negnum", "negname", "spacenegnum", "spacenegname", "{", "}", ",", "ish", "result", "procedure", "e"};
 string operators[] = { "+", "-", "*", "/", "^" };
+string ronts[] = { "RTERMADDSUB", "RTERMMULTDIV", "RTERMPOWER" };
 
 vector<string> readInFile(string filePath) {
 	vector<string> lines;
@@ -844,13 +845,15 @@ class Node {
 
 	Node* child1;
 	Node* child2;
+
+	Node* parent;
 };
 
 struct variable {
 public:
 	string type;
 	string name;
-	int value;
+	float value;
 
 	Node* root;
 };
@@ -883,45 +886,81 @@ public:
 	}
 };
 
-void addToTree(Node*& root, string word, vector<variable>& variables) {
+inline bool isInteger(const std::string& s)
+{
+	if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))) return false;
 
-	Node* newNode = new Node();
-	int intValue = 0;
-	
-	try {
-		intValue = std::stoi(word);
-	}
-	catch (std::exception e) {
-		for (variable var : variables) {
-			if (var.name == word) {
-				intValue = var.value;
-				break;
-			}
-		}
-	}
+	char* p;
+	strtol(s.c_str(), &p, 10);
 
-    newNode->value = word;
+	return (*p == 0);
+}
+
+void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& variables) {
 
 	// If word is an operator - place in parent node; move to said parent node
 	if (word == "+" || word == "-" || word == "*" || word == "/" || word == "^") {
-		newNode->child1 = root;
-		root = newNode;
+
+		if (root == focusNode) {
+			Node* newNode = new Node();
+			newNode->value = word;
+			newNode->child1 = root;
+
+			root->parent = newNode;
+			root = newNode;
+			focusNode = newNode;
+		}
+		else {
+			Node* newNode = new Node();
+			newNode->value = word;
+
+			Node* tempNode = focusNode;
+			newNode->parent = focusNode->parent;
+			focusNode->parent->child2 = newNode;
+			newNode->child1 = tempNode;
+			focusNode = newNode;	
+		}
+
 	} else {
-		// else if word is not an operator - place into child node or first node if tree is empty
-			// add word to child node
-		if (root == nullptr) {
-			// Create first node
-			root = newNode;
-		} else if (root->value == "") {
-			root = newNode;
-		} else {
-			if (root->child1 == nullptr) {
-				root->child1 = newNode; // Theoretically it should never get here
-			}
-			else {
-				root->child2 = newNode;
+		//// else if word is not an operator - place into child node or first node if tree is empty
+		//	// add word to child node
+		//if (root == nullptr) {
+		//	// Create first node
+		//	root = newNode;
+		//	focusNode = root;
+		//} else if (root->value == "") {
+		//	focusNode = newNode;
+		//} else {
+		//	if (focusNode->child1 == nullptr) {
+		//		focusNode->child1 = newNode; // Theoretically it should never get here
+		//	}
+		//	else {
+		//		focusNode->child2 = newNode;
+		//	}
+		//}
+
+		string intValue = word;
+
+		if (!isInteger(word)) {
+			for (variable var : variables) {
+				if (var.name == word) {
+					intValue = std::to_string(var.value);
+					break;
+				}
 			}
 		}
+
+		if (root == nullptr) {
+			root = new Node();
+			root->value = intValue;
+			focusNode = root;
+		}
+		else {
+			// TODO: change to intValue when working
+			focusNode->value = intValue;
+		}
+		
+		// Do I need to overide any nonterminals? TODO:
 		
 	}
 }
@@ -929,6 +968,8 @@ void addToTree(Node*& root, string word, vector<variable>& variables) {
 bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables) {
 	vector<string> stack;
 	string focus;
+	Node* focusNode = root;
+	vector<int> depthStack;
 
 	bool isNegVal = true;
 	string word = nextWord(line, isNegVal);
@@ -947,23 +988,36 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 		}
 		else if ((std::find(std::begin(terminals), std::end(terminals), focus) != std::end(terminals)) || focus == "eof") {
 			if (focus == getTermType(word)) {
+				stack.pop_back();
 			    
 				// If type declaring for a variable
-				if (stack[1] == "VARTYPEAFTER") { //  && (focus == "num" || focus == "ish")
+				if (stack.back() == "VARTYPEAFTER") { //  && (focus == "num" || focus == "ish")
 					var.type = word;
 				}
-				else if (stack[1] == "LINEVARNAMEREMAINING") { //  && (focus == "num" || focus == "ish")
+				else if (stack.back() == "LINEVARNAMEREMAINING") { //  && (focus == "num" || focus == "ish")
+					for (variable varLook : variables) {
+						if (varLook.name == word)
+							return 0; // Duplicate variable name error
+					}
 					var.name = word;
 				}
 
 				// If not elipson
 				else if (word != "e" && word != "=" && word != "(" && word != ")" && word != "{" && word != "}" && word != ",") {
-					addToTree(root, word, variables);
+					addToTree(root, focusNode, word, variables);
 				} 
+
+				// Create Empty Node on tree
+				if (stack.back() == "RTERMADDSUB" || stack.back() == "RTERMMULTDIV" || stack.back() == "RTERMPOWER") {
+					focusNode->child2 = new Node();
+					focusNode->child2->parent = focusNode;
+					focusNode = focusNode->child2;
+
+					depthStack.push_back(stack.size());
+				}
 
 				// If word is name for variable
 			    
-				stack.pop_back();
 				word = nextWord(line, isNegVal);
 				if (line[0] == ' ')
 					line.erase(0, 1);
@@ -994,7 +1048,16 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 					if (stack.back() == curProduction.front())
 						return 0;
 
+					if (stack.size() > 0 && (stack.back() != "+" || stack.back() != "-" || stack.back() != "*" || stack.back() != "/" || stack.back() != "^" || stack.back() == "RTERMADDSUB" || stack.back() == "RTERMMULTDIV" || stack.back() == "RTERMPOWER")) {
+						if (curProduction.front() == "e") {
+							if (depthStack.size() > 0 && depthStack.back() == stack.size() && focusNode != nullptr) {
+								depthStack.pop_back();
+								focusNode = focusNode->parent;
+							}
+						}
+					}
 					stack.pop_back();
+					
 					for (int i = curProduction.size() - 1; i >= 0; i--) {
 						if (curProduction[i] != "e") {
 							stack.push_back(curProduction[i]);
@@ -1019,7 +1082,46 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 	}
 }
 
-int operate(int val1, int val2, string selfValue) {
+int operate(int val1, int val2, string selfValue, vector<variable> variables) {
+	if (selfValue == "+")
+		return val1 + val2;
+	if (selfValue == "-")
+		return val1 - val2;
+	if (selfValue == "*")
+		return val1 * val2;
+	if (selfValue == "/") {
+		if (val2 == 0)
+			throw std::invalid_argument("Divide by zero");
+
+		return val1 / val2;
+	}
+	if (selfValue == "^") {
+		int value = 1;
+		for (int i = 0; i < val2; i++)
+			value *= val1;
+		return value;
+	}
+
+	string intValue = selfValue;
+
+	if (selfValue[0] == '-')
+		intValue.erase(0, 1);
+
+	if (!isInteger(selfValue)) {
+		for (variable var : variables) {
+			if (var.name == selfValue) {
+				intValue = var.value;
+				break;
+			}
+		}
+	}
+
+	return std::stoi(intValue);; // TODO: does this work?
+			// TODO: check if selfValue is an int, if so return it
+			// - else if selfValue is in the variables list, return the value assigned to that
+}
+
+float operate(float val1, float val2, string selfValue, vector<variable> variables) {
 	if (selfValue == "+")
 		return val1 + val2;
 	if (selfValue == "-")
@@ -1033,43 +1135,65 @@ int operate(int val1, int val2, string selfValue) {
 		return val1 / val2;
 	}
 	if (selfValue == "^") {
-		int value = 1;
+		float value = 1;
 		for (int i = 0; i < val2; i++)
 			value *= val1;
 		return value;
 	}
 
+	string intValue = selfValue;
 
-	return std::stoi(selfValue); // TODO: does this work?
+	/*if (!isInteger(selfValue)) {
+		for (variable var : variables) {
+			if (var.name == selfValue) {
+				intValue = var.value;
+				break;
+			}
+		}
+	}*/
+
+	return std::stof(intValue); // TODO: does this work?
 			// TODO: check if selfValue is an int, if so return it
 			// - else if selfValue is in the variables list, return the value assigned to that
 }
 
-int nestNode(Node* curNode) {
+float nestNode(Node* curNode, string type, vector<variable> variables) {
 	// TODO: return ERROR if bad operation
 
-	int val1 = 0;
-	int val2 = 0;
+	if (type == "ish") {
+		float val1 = 0.0;
+		float val2 = 0.0;
 
-	// Reverse order operation // TODO: This does not traverse the order correctly
-	if (curNode->child1 != nullptr)
-		val1 = nestNode(curNode->child1);
-	if (curNode->child2 != nullptr)
-		val2 = nestNode(curNode->child2);
+		// Reverse order operation
+		if (curNode->child1 != nullptr)
+			val1 = nestNode(curNode->child1, type, variables);
+		if (curNode->child2 != nullptr)
+			val2 = nestNode(curNode->child2, type, variables);
 
-	return operate(val1, val2, curNode->value);// TODO: does this work?
+		return operate(val1, val2, curNode->value, variables);
+	}
+	else if (type == "num") {
+		int val1 = 0;
+		int val2 = 0;
+
+		// Reverse order operation
+		if (curNode->child1 != nullptr)
+			val1 = nestNode(curNode->child1, type, variables);
+		if (curNode->child2 != nullptr)
+			val2 = nestNode(curNode->child2, type, variables);
+
+		return operate(val1, val2, curNode->value, variables);
+	}
+
+	return 0;
 }
 
-int performCalc(Node* root) {
-	try {
-		if (root != nullptr)
-			return nestNode(root);
-		else
-			return 0;
-	}
-	catch (std::exception e) {
+float performCalc(Node* root, string type, vector<variable> variables) {
+
+	if (root != nullptr)
+		return nestNode(root, type, variables);
+	else
 		return 0;
-	}
 }
 
 int main()
@@ -1093,19 +1217,26 @@ int main()
 		}
 
 		string passedStr = "invalid";
+		string errorStr = "";
 		
 		// Keeps track of the values in a tree
-		Node* root = new Node();
+		Node* root = nullptr;
 		variable var;
 
 		// Perform the algorithm
 		if (checkLine(productionTable, parseTable, line, root, var, variables)) {
-			passedStr = "valid";
+			try {
+				passedStr = "valid";
 
-			// Perform Math operation on line using post-order traversal and save into variables
-			var.value = performCalc(root);
-			var.root = root;
-			variables.push_back(var);
+				// Perform Math operation on line using post-order traversal and save into variables
+				var.value = performCalc(root, var.type, variables);
+				var.root = root;
+				variables.push_back(var);
+			}
+			catch (std::exception e) {
+				passedStr = "invalid";
+			}
+
 		}
 			
 		std::cout << "(" << passedStr << "): " << line << "\n";
@@ -1113,7 +1244,13 @@ int main()
 
 	std::cout << "\n\nVariables\n";
 	for (variable var : variables) {
-		std::cout << var.type << " " << var.name << " = " << var.value << "\n";
+		
+		if (var.type == "num")
+			std::cout << var.type << " " << var.name << " = " << (int)var.value << "\n";
+		else 
+			std::cout << var.type << " " << var.name << " = " << var.value << "\n";
+
+		
 	}
 
 	return 0;
