@@ -1134,7 +1134,7 @@ float operate(float val1, float val2, string selfValue, vector<variable> variabl
 
 		return val1 / val2;
 	}
-	if (selfValue == "^") {
+	if (selfValue == "^") { // TODO: double check to make sure exponents are working correctly
 		float value = 1;
 		for (int i = 0; i < val2; i++)
 			value *= val1;
