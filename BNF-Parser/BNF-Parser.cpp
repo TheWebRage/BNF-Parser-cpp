@@ -754,54 +754,6 @@ string nextWord(string line, bool isNegVal = false) {
 			    word += ch;
 			}
 
-// 			// Compare with KeyTerms
-// 			if (isInArray(keyTerms, ch) && ch != ' ') {
-// 				if (nonNumspaceChars > 0)
-// 					break;
-
-// 				if (ch == ')')
-// 					return ")";
-// 				if (ch == '(')
-// 					return "(";
-
-// 				// Negative Logic
-// 				if (ch == '-') {
-// 					if (isNegVal) {
-// 						word += ch;
-// 						nonNumspaceChars++;
-// 						hasNegChar = true;
-// 						continue;
-// 					}
-// 					else {
-// 						return "-";
-// 					}
-// 				}
-
-// 				if (nonNumspaceChars == 0 && numSpaceChars == 0) {
-// 					line.erase(0, 1);
-// 					std::string s(1, ch);
-// 					return s;
-// 				}
-// 				else {
-// 					if (nextChar == ' ') {
-// 						std::string s(1, ch);
-// 						return s;
-// 					}
-
-// 					word += ch;
-// 				}
-// 			}
-// 			else if (ch == ' ' && word.size() > 0 && nonNumspaceChars > 0) {
-// 				break;
-// 			}
-// 			else {
-// 				if (ch != ' ')
-// 					nonNumspaceChars++;
-// 				else
-// 					numSpaceChars++;
-
-// 				word += ch;
-// 			}
 		}
 		
 		line.erase(0, word.size());
@@ -901,6 +853,10 @@ void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& var
 			for (variable var : variables) {
 				if (var.name == word) {
 					intValue = std::to_string(var.value);
+
+                	if (intValue[0] == '-')
+                		intValue.erase(0, 1);
+                		
 					break;
 				}
 			}
@@ -1060,13 +1016,14 @@ T operate(T val1, T val2, string selfValue, vector<variable> variables) {
 
 	string intValue = selfValue;
 
-	if (selfValue[0] == '-')
-		intValue.erase(0, 1);
-
 	if (!isInteger(selfValue)) {
 		for (variable var : variables) {
 			if (var.name == selfValue) {
 				intValue = var.value;
+
+            	if (selfValue[0] == '-')
+            		intValue.erase(0, 1);
+            		
 				break;
 			}
 		}
@@ -1147,7 +1104,7 @@ int main()
 				variables.push_back(var);
 			}
 			catch (std::exception e) {
-				passedStr = "invalid";
+				// passedStr = "invalid";
 			}
 
 		}
