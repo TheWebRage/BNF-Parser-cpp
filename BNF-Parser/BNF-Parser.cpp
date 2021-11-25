@@ -23,8 +23,8 @@ using std::pair;
 // string terminals[] = { "eof", "+", "-", "*", "/", "(", ")", "name", "num", "negname", "negnum", "spacenegname", "spacenegnum" };
 
 // IR Version
-string nonTerminals[] = {"GOAL", "LINEFULL", "VARTYPEAFTER", "LINEVARNAME", "LINEVARNAMEREMAINING", "PROCEDUREPARAMS", "PARAMS", "MOREPARAMS", "VARTYPE", "EXPR", "LTERMADDSUB", "LTERMMULTDIV", "RTERMMULTDIV", "RTERMADDSUB", "ADDSUBp", "MULTDIVp", "MULTANDRIGHTOP", "DIVANDRIGHTOP", "POWERp", "POWERANDRIGHTOP", "LTERMPOWER", "RTERMPOWER", "GTERM", "PARENS", "POSVAL", "SPACENEGVAL"};
-string terminals[] = {"eof", "+", "-", "*", "/", "=", "(", ")", "^", "num", "name", "negnum", "negname", "spacenegnum", "spacenegname", "{", "}", ",", "ish", "result", "procedure", "e"};
+string nonTerminals[] = { "GOAL", "LINEFULL", "VARTYPEAFTER", "LINEVARNAME", "LINEVARNAMEREMAINING", "PROCEDUREPARAMS", "PARAMS", "MOREPARAMS", "VARTYPE", "EXPR", "LTERMADDSUB", "LTERMMULTDIV", "RTERMMULTDIV", "RTERMADDSUB", "ADDSUBp", "MULTDIVp", "MULTANDRIGHTOP", "DIVANDRIGHTOP", "POWERp", "POWERANDRIGHTOP", "LTERMPOWER", "RTERMPOWER", "GTERM", "PARENS", "POSVAL", "SPACENEGVAL" };
+string terminals[] = { "eof", "+", "-", "*", "/", "=", "(", ")", "^", "num", "name", "negnum", "negname", "spacenegnum", "spacenegname", "{", "}", ",", "ish", "result", "procedure", "e" };
 string operators[] = { "+", "-", "*", "/", "^" };
 string ronts[] = { "RTERMADDSUB", "RTERMMULTDIV", "RTERMPOWER" };
 
@@ -46,7 +46,7 @@ vector<string> readInFile(string filePath) {
 	return lines;
 }
 
-vector<vector<string>> createProductionTable() { // TODO: add in new production table
+vector<vector<string>> createProductionTable() {
 	vector<vector<string>> productionTable;
 
 	// Insert productions into structure
@@ -348,19 +348,19 @@ bool isTerminal(string term) {
 }
 
 bool isRONT(string term) {
-    for (string ront : ronts) {
-        if (term == ront)
-            return true;
-    }
-    return false;
+	for (string ront : ronts) {
+		if (term == ront)
+			return true;
+	}
+	return false;
 }
 
 bool isOperator(string term) {
-    for (string operStr : operators) {
-        if (term == operStr)
-            return true;
-    }
-    return false;
+	for (string operStr : operators) {
+		if (term == operStr)
+			return true;
+	}
+	return false;
 }
 
 bool isInVector(vector<string> set1, string itemInSet) {
@@ -407,7 +407,7 @@ set<string> removeElement(set<string> set1, string removeStr) {
 }
 
 bool isAllSpace(string word) {
-    return word.find_first_not_of(' ') == std::string::npos;
+	return word.find_first_not_of(' ') == std::string::npos;
 }
 
 inline bool isInteger(const std::string& s)
@@ -421,35 +421,35 @@ inline bool isInteger(const std::string& s)
 }
 
 void printTable(map< string, set<string> > table, string tableName = "") {
-    std::cout << tableName;
+	std::cout << tableName;
 	for (string term : terminals) {
-	    std::cout << term << ": ";
-	    for (string item : table[term])
-	        std::cout << item << " ";
-	    
-	    std::cout << "\n";
+		std::cout << term << ": ";
+		for (string item : table[term])
+			std::cout << item << " ";
+
+		std::cout << "\n";
 	}
 	for (string nonTerm : nonTerminals) {
-	    std::cout << nonTerm << ": ";
-	    for (string item : table[nonTerm])
-	        std::cout << item << " ";
-	    
-	    std::cout << "\n";
+		std::cout << nonTerm << ": ";
+		for (string item : table[nonTerm])
+			std::cout << item << " ";
+
+		std::cout << "\n";
 	}
 }
 
 void printTable(map<string, map<string, int>> table, string tableName = "") {
-    std::cout << tableName;
+	std::cout << tableName;
 	for (string term : terminals) {
-	        std::cout << "\t" << term;
-	    }
+		std::cout << "\t" << term;
+	}
 	std::cout << "\n";
 	for (string nonTerm : nonTerminals) {
-	    std::cout << nonTerm << ":";
-	    for (string term : terminals) {
-	        std::cout << "\t" << table[nonTerm][term];
-	    }
-	    std::cout << "\n";
+		std::cout << nonTerm << ":";
+		for (string term : terminals) {
+			std::cout << "\t" << table[nonTerm][term];
+		}
+		std::cout << "\n";
 	}
 }
 
@@ -474,7 +474,7 @@ void first(vector< vector<string> > productionTable, map< string, set<string> >&
 			for (int c = 0; c < production.size(); c++) {
 				string part = production[c];
 				if (part == "e" && i + 1 <= production.size() - 1) {
-					rhs = unionSets(rhs, firstTable[production[i + 1]]); 
+					rhs = unionSets(rhs, firstTable[production[i + 1]]);
 					i++;
 				}
 			}
@@ -617,11 +617,11 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 	//build FIRST, FOLLOW, and FIRST + sets;
 	map< string, set<string> > firstTable;
 	first(productionTable, firstTable);
-    // printTable(firstTable, "\n\nFirst:\n");
+	// printTable(firstTable, "\n\nFirst:\n");
 
 	map< string, set<string> > followTable;
 	follow(productionTable, followTable, firstTable);
-    // printTable(followTable, "\n\nFollow:\n");
+	// printTable(followTable, "\n\nFollow:\n");
 
 	set<string> firstPlusSet;
 
@@ -661,12 +661,15 @@ map<string, map<string, int>> createParseTable(vector< vector<string> > producti
 	//end;
 	*/
 
-    // printTable(parseTable, "\n\nParseTable:\n");
+	// printTable(parseTable, "\n\nParseTable:\n");
 
 	return parseTable;
 }
 
 string getTermType(string word) {
+	if (word == "procedure")
+		return word;
+
 	if (!(std::find(std::begin(terminals), std::end(terminals), word) != std::end(terminals))) {
 
 		if (std::regex_match(word, std::regex("[0-9]+.?[0-9]*")))
@@ -700,7 +703,7 @@ string getTermType(string word) {
 }
 
 string nextWord(string line, bool isNegVal = false) {
-	char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^' };
+	char keyTerms[] = { '+', '-', '*', '/', '(', ')', '^', ','};
 	string word = "";
 	int nonNumspaceChars = 0;
 	int numSpaceChars = 0;
@@ -708,7 +711,7 @@ string nextWord(string line, bool isNegVal = false) {
 
 	// Get the next word
 	if (line.size() > 0) {
-		
+
 		for (int i = 0; i < line.size(); i++) {
 			char ch = line[i];
 			char nextChar = '\0';
@@ -716,56 +719,60 @@ string nextWord(string line, bool isNegVal = false) {
 			if (line.size() > i + 1) {
 				nextChar = line[i + 1];
 			}
-			
+
 			// if the character is a terminal (not '-')
 			if (isInArray(keyTerms, ch) && ch != '-') {
-			    
-			    // if the string only has spaces, add the char to the word
-			    if(isAllSpace(word))
-                {
-			        word += ch;
-                }
-                
-                // End scanning
-			    break;
+
+				// if the string only has spaces, add the char to the word
+				if (isAllSpace(word))
+				{
+					word += ch;
+				}
+
+				// End scanning
+				break;
 			}
-			
+
 			else if (ch == '-') {
-			    // If the value is not a neg value, stop scanning
-			    if (!isNegVal) {
-			        // if the string only has spaces, add the char to the word
-    			    if(isAllSpace(word) || word == "")
-                    {
-    			        word += ch;
-                    }
-                    break;
-			    } else {
-    			    if(isAllSpace(word) || word == "")
-                    {
-    			        word += ch;
-                    } else {
-                        break;
-                    }
-			        
-			    }
-			} else if (!isAllSpace(word) && ch == ' ') {
-			    break;
-			} else {
-			    word += ch;
+				// If the value is not a neg value, stop scanning
+				if (!isNegVal) {
+					// if the string only has spaces, add the char to the word
+					if (isAllSpace(word) || word == "")
+					{
+						word += ch;
+					}
+					break;
+				}
+				else {
+					if (isAllSpace(word) || word == "")
+					{
+						word += ch;
+					}
+					else {
+						break;
+					}
+
+				}
+			}
+			else if (!isAllSpace(word) && ch == ' ') {
+				break;
+			}
+			else {
+				word += ch;
 			}
 
 		}
-		
+
 		line.erase(0, word.size());
 
 		while (word[0] == ' ') {
 			if (word[1] == '-' && word.size() > 2 && isNegVal) {
-			    break;
+				break;
 			}
 			word.erase(0, 1);
 
 		}
-		
+
 		return word;
 	}
 	else {
@@ -774,8 +781,8 @@ string nextWord(string line, bool isNegVal = false) {
 }
 
 class Node {
-    public:
-    
+public:
+
 	string value = "";
 
 	Node* child1;
@@ -843,10 +850,11 @@ void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& var
 			newNode->parent = focusNode->parent;
 			focusNode->parent->child2 = newNode;
 			newNode->child1 = tempNode;
-			focusNode = newNode;	
+			focusNode = newNode;
 		}
 
-	} else {
+	}
+	else {
 		string intValue = word;
 
 		if (!isInteger(word)) {
@@ -854,9 +862,9 @@ void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& var
 				if (var.name == word) {
 					intValue = std::to_string(var.value);
 
-                	if (intValue[0] == '-')
-                		intValue.erase(0, 1);
-                		
+					if (intValue[0] == '-')
+						intValue.erase(0, 1);
+
 					break;
 				}
 			}
@@ -870,7 +878,7 @@ void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& var
 		else {
 			focusNode->value = intValue;
 		}
-		
+
 	}
 }
 
@@ -898,7 +906,7 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 		else if ((std::find(std::begin(terminals), std::end(terminals), focus) != std::end(terminals)) || focus == "eof") {
 			if (focus == getTermType(word)) {
 				stack.pop_back();
-			    
+
 				// If type declaring for a variable
 				if (stack.back() == "VARTYPEAFTER") {
 					var.type = word;
@@ -914,10 +922,10 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 				// If not elipson
 				else if (word != "e" && word != "=" && word != "(" && word != ")" && word != "{" && word != "}" && word != ",") {
 					addToTree(root, focusNode, word, variables);
-				} 
+				}
 
 				// Create Empty Node on tree
-				if ( isRONT(stack.back()) ) {
+				if (isRONT(stack.back())) {
 					focusNode->child2 = new Node();
 					focusNode->child2->parent = focusNode;
 					focusNode = focusNode->child2;
@@ -926,7 +934,7 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 				}
 
 				// If word is name for variable
-			    
+
 				word = nextWord(line, isNegVal);
 				if (line[0] == ' ')
 					line.erase(0, 1);
@@ -957,18 +965,18 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 					if (stack.back() == curProduction.front())
 						return 0;
 
-                    // If consuming a RONT, move up the tree
+					// If consuming a RONT, move up the tree
 					if (stack.size() > 0 && depthStack.size() > 0 && focusNode != nullptr) {
-						if (curProduction.front() == "e"  && !isOperator(stack.back()) && !isRONT(stack.back())) {
+						if (curProduction.front() == "e" && !isOperator(stack.back()) && !isRONT(stack.back())) {
 							if (depthStack.back() == stack.size()) {
 								depthStack.pop_back();
 								focusNode = focusNode->parent;
 							}
 						}
 					}
-					
+
 					stack.pop_back();
-					
+
 					for (int i = curProduction.size() - 1; i >= 0; i--) {
 						if (curProduction[i] != "e") {
 							stack.push_back(curProduction[i]);
@@ -1021,20 +1029,20 @@ T operate(T val1, T val2, string selfValue, vector<variable> variables) {
 			if (var.name == selfValue) {
 				intValue = var.value;
 
-            	if (selfValue[0] == '-')
-            		intValue.erase(0, 1);
-            		
+				if (selfValue[0] == '-')
+					intValue.erase(0, 1);
+
 				break;
 			}
 		}
 	}
 
-    // if type is a float, return float string
-    if (std::is_same<T, float>::value) {
-        return std::stof(intValue);
-    }
+	// if type is a float, return float string
+	if (std::is_same<T, float>::value) {
+		return std::stof(intValue);
+	}
 
-    // Otherwise return an int as a string
+	// Otherwise return an int as a string
 	return std::stoi(intValue);
 }
 
@@ -1055,13 +1063,13 @@ float nestNode(Node* curNode, string type, vector<variable> variables) {
 float performCalc(Node* root, string type, vector<variable> variables) {
 
 	if (root != nullptr)
-	
-	    // Decide what type to pass in
-	    if (type == "ish")
-		    return nestNode<float>(root, type, variables);
+
+		// Decide what type to pass in
+		if (type == "ish")
+			return nestNode<float>(root, type, variables);
 		else
-		    return nestNode<int>(root, type, variables);
-		    
+			return nestNode<int>(root, type, variables);
+
 	else
 		return 0;
 }
@@ -1077,7 +1085,7 @@ int main()
 
 	// Keep track of the IR
 	vector < variable > variables;
-	
+
 
 	for (string line : file) {
 		// Skip lines with comments
@@ -1088,7 +1096,7 @@ int main()
 
 		string passedStr = "invalid";
 		string errorStr = "";
-		
+
 		// Keeps track of the values in a tree
 		Node* root = nullptr;
 		variable var;
@@ -1108,19 +1116,19 @@ int main()
 			}
 
 		}
-			
+
 		std::cout << "(" << passedStr << "): " << line << "\n";
 	}
 
 	std::cout << "\n\nVariables\n";
 	for (variable var : variables) {
-		
+
 		if (var.type == "num")
 			std::cout << var.type << " " << var.name << " = " << (int)var.value << "\n";
-		else 
+		else
 			std::cout << var.type << " " << var.name << " = " << var.value << "\n";
 
-		
+
 	}
 
 	return 0;
