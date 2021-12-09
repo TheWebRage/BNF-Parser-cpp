@@ -13,12 +13,14 @@
 #include "scanner.cpp"
 #include "LL1.cpp"
 #include "IR.cpp"
+#include "asm.cpp"
 
 using std::string;
 using std::vector;
 using std::map;
 using std::set;
 using std::pair;
+using std::cout;
 
 
 bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables) {
@@ -146,7 +148,7 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 int main()
 {
 	// Read in files 
-	vector<string> file = readInFile("./ir.txt");
+	vector<string> file = readInFile("./asm.txt");
 
 	// Create structures for the algorithm
 	vector<vector<string>> productionTable = createProductionTable();
@@ -157,11 +159,14 @@ int main()
 	
 	bool isProcedure = false;
 
+	// If first word is a print function
+
+
 
 	for (string line : file) {
 		// Skip lines with comments
 		if (line[0] == '/' && line[1] == '/') {
-			std::cout << "\n\n" << line << "\n";
+			cout << "\n\n" << line << "\n";
 			continue;
 		}
 
@@ -202,16 +207,16 @@ int main()
 
 		}
 
-		std::cout << "(" << passedStr << "): " << line << "\n";
+		cout << "(" << passedStr << "): " << line << "\n";
 	}
 
-	std::cout << "\n\nVariables\n";
+	cout << "\n\nVariables\n";
 	for (variable var : variables) {
 
 		if (var.type == "num")
-			std::cout << var.type << " " << var.name << " = " << (int)var.value << "\n";
+			cout << var.type << " " << var.name << " = " << (int)var.value << "\n";
 		else if (var.type == "ish")
-			std::cout << var.type << " " << var.name << " = " << var.value << "\n";
+			cout << var.type << " " << var.name << " = " << var.value << "\n";
 
 
 	}

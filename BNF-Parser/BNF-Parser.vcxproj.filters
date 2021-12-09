@@ -13,36 +13,48 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\components">
+      <UniqueIdentifier>{882a0ad1-8139-4e36-8798-7af116f83160}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tests">
+      <UniqueIdentifier>{f7993b2c-6663-49bb-b3b6-674174652a17}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BNF-Parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers.cpp">
+    <ClCompile Include="LL1-Compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="constants.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\components</Filter>
     </ClCompile>
-    <ClCompile Include="LL1.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="helpers.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
     <ClCompile Include="IR.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="LL1.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
     <ClCompile Include="scanner.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="asm.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="invalid.txt">
-      <Filter>Source Files</Filter>
+    <Text Include="asm.txt">
+      <Filter>Source Files\tests</Filter>
     </Text>
-    <Text Include="valid.txt">
-      <Filter>Source Files</Filter>
+    <Text Include="invalid.txt">
+      <Filter>Source Files\tests</Filter>
     </Text>
     <Text Include="ir.txt">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\tests</Filter>
+    </Text>
+    <Text Include="valid.txt">
+      <Filter>Source Files\tests</Filter>
     </Text>
   </ItemGroup>
 </Project>
