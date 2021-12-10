@@ -21,6 +21,7 @@ using std::map;
 using std::set;
 using std::pair;
 using std::cout;
+using std::ofstream;
 
 
 bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables) {
@@ -159,9 +160,8 @@ int main()
 	
 	bool isProcedure = false;
 
-	// If first word is a print function
-
-
+	// Keeps track of the main body asm output
+	string asmBody = "";
 
 	for (string line : file) {
 		// Skip lines with comments
@@ -176,6 +176,10 @@ int main()
 		// Keeps track of the values in a tree
 		Node* root = nullptr;
 		variable var;
+
+		// If first word is a print function // TODO: get prints working hacky here
+
+		// TODO: get procedures working here hacky
 
 		// Perform the algorithm
 		if (checkLine(productionTable, parseTable, line, root, var, variables)) {
@@ -212,14 +216,19 @@ int main()
 
 	cout << "\n\nVariables\n";
 	for (variable var : variables) {
-
 		if (var.type == "num")
 			cout << var.type << " " << var.name << " = " << (int)var.value << "\n";
 		else if (var.type == "ish")
 			cout << var.type << " " << var.name << " = " << var.value << "\n";
-
-
 	}
+
+
+	// Output to an asm file
+	ofstream fileO;
+	fileO.open("./output/output.asm");
+	fileO << startFile(variables) + asmBody;
+	fileO.close();
+
 
 	return 0;
 }
