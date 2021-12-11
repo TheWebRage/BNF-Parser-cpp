@@ -98,8 +98,7 @@ ish float3 = ((3.55))
 printIsh float3
 ish float4 = 3.14159+2.718218
 printIsh float4
-// Prevent reuse (don't compute the last value, just report the issue and 
-continue)
+// Prevent reuse (don't compute the last value, just report the issue and continue)
 num issue1 = 5
 num issue2 = 3 + 4
 num issue1 = 16

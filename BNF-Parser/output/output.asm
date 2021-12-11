@@ -40,8 +40,13 @@ var42: resd 1
 var43: resd 1
 var44: resd 1
 var45: resd 1
+float1: resd 1
+float2: resd 1
+float3: resd 1
+float4: resd 1
 issue1: resd 1
 issue2: resd 1
+error: resd 1
 orig: resd 1
 copy: resd 1
 var49: resd 1
@@ -53,7 +58,11 @@ user1: resd 1
 user2: resd 1
 user3: resd 1
 user4: resd 1
-: resd 1
+userResult1: resd 1
+userResult2: resd 1
+userResult3: resd 1
+userResult4: resd 1
+result: resd 1
 : resd 1
 : resd 1
 a: resd 1
@@ -68,3 +77,608 @@ extern scanf
 global main
 main :
 push rbp; Push base pointer onto stack to save it
+
+mov eax, 12
+mov [var1], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var1]
+xor rax, rax
+call printf
+
+mov eax, 2
+mov [var2], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var2]
+xor rax, rax
+call printf
+
+mov eax, 2
+mov [var3], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var3]
+xor rax, rax
+call printf
+
+mov eax, 17
+mov [var4], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var4]
+xor rax, rax
+call printf
+
+mov eax, 1542
+mov [var5], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var5]
+xor rax, rax
+call printf
+
+mov eax, 0
+mov [var6], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var6]
+xor rax, rax
+call printf
+
+mov eax, 29
+mov [var7], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var7]
+xor rax, rax
+call printf
+
+mov eax, 42
+mov [var8], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var8]
+xor rax, rax
+call printf
+
+mov eax, 42
+mov [var9], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var9]
+xor rax, rax
+call printf
+
+mov eax, 42
+mov [var10], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var10]
+xor rax, rax
+call printf
+
+mov eax, 42
+mov [var11], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var11]
+xor rax, rax
+call printf
+
+mov eax, 7006652
+mov [var12], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var12]
+xor rax, rax
+call printf
+
+mov eax, 1
+mov [var13], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var13]
+xor rax, rax
+call printf
+
+mov eax, 10
+mov [var14], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var14]
+xor rax, rax
+call printf
+
+mov eax, 9
+mov [var15], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var15]
+xor rax, rax
+call printf
+
+mov eax, 31
+mov [var16], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var16]
+xor rax, rax
+call printf
+
+mov eax, 1337
+mov [var17], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var17]
+xor rax, rax
+call printf
+
+mov eax, -42
+mov [var18], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var18]
+xor rax, rax
+call printf
+
+mov eax, -42
+mov [var19], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var19]
+xor rax, rax
+call printf
+
+mov eax, -42
+mov [var21], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var21]
+xor rax, rax
+call printf
+
+mov eax, -1
+mov [var23], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var23]
+xor rax, rax
+call printf
+
+mov eax, -1
+mov [var24], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var24]
+xor rax, rax
+call printf
+
+mov eax, 1
+mov [var34], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var34]
+xor rax, rax
+call printf
+
+mov eax, 5
+mov [var35], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var35]
+xor rax, rax
+call printf
+
+mov eax, 5
+mov [var36], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var36]
+xor rax, rax
+call printf
+
+mov eax, -4
+mov [var39], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var39]
+xor rax, rax
+call printf
+
+mov eax, 27
+mov [var41], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var41]
+xor rax, rax
+call printf
+
+mov eax, 256
+mov [var42], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var42]
+xor rax, rax
+call printf
+
+mov eax, 19683
+mov [var43], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var43]
+xor rax, rax
+call printf
+
+mov eax, 2030534528
+mov [var44], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var44]
+xor rax, rax
+call printf
+
+mov eax, 149
+mov [var45], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var45]
+xor rax, rax
+call printf
+
+mov eax, 3
+mov [float1], eax
+
+mov eax, 3
+mov [float2], eax
+
+mov eax, 3
+mov [float3], eax
+
+mov eax, 5
+mov [float4], eax
+
+mov eax, 5
+mov [issue1], eax
+
+mov eax, 7
+mov [issue2], eax
+
+mov eax, 6
+mov [orig], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [orig]
+xor rax, rax
+call printf
+
+mov eax, 6
+mov [copy], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [copy]
+xor rax, rax
+call printf
+
+mov eax, 14
+mov [var49], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var49]
+xor rax, rax
+call printf
+
+mov eax, 10
+mov [var50], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var50]
+xor rax, rax
+call printf
+
+mov eax, -10
+mov [var51], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var51]
+xor rax, rax
+call printf
+
+mov eax, 144
+mov [var52], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var52]
+xor rax, rax
+call printf
+
+mov eax, 29336
+mov [var53], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var53]
+xor rax, rax
+call printf
+
+
+; print a string
+mov rsi,  "This begins the user input section"
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+
+; print a string
+mov rsi,  "Supply data and hit enter"
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+
+; print a string
+mov rsi,  "Enter a number: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+mov eax, 0
+mov [user1], eax
+
+
+; read an integer
+lea rdi, [fmtuintin]
+lea rsi, [user1]
+mov rax, 0
+call scanf
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [user1]
+xor rax, rax
+call printf
+
+
+; print a string
+mov rsi,  "Enter a number: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+mov eax, 0
+mov [user2], eax
+
+
+; read an integer
+lea rdi, [fmtuintin]
+lea rsi, [user2]
+mov rax, 0
+call scanf
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [user2]
+xor rax, rax
+call printf
+
+
+; print a string
+mov rsi,  "Enter a number: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+mov eax, 0
+mov [user3], eax
+
+
+; read an integer
+lea rdi, [fmtuintin]
+lea rsi, [user3]
+mov rax, 0
+call scanf
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [user3]
+xor rax, rax
+call printf
+
+
+; print a string
+mov rsi,  "Enter a number: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+mov eax, 0
+mov [user4], eax
+
+
+; read an integer
+lea rdi, [fmtuintin]
+lea rsi, [user4]
+mov rax, 0
+call scanf
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [user4]
+xor rax, rax
+call printf
+
+mov eax, 0
+mov [userResult1], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [userResult1]
+xor rax, rax
+call printf
+
+mov eax, 0
+mov [userResult2], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [userResult2]
+xor rax, rax
+call printf
+
+mov eax, 0
+mov [userResult3], eax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [userResult3]
+xor rax, rax
+call printf
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [userResult4]
+xor rax, rax
+call printf
+
+mov eax, 0
+mov [], eax
+
+mov eax, 0
+mov [], eax
+
+mov eax, 2
+mov [a], eax
+
+mov eax, 3
+mov [b], eax
+
+
+; print a string
+mov rsi,  "Result of adding first and second user inputs: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+
+; print a string
+mov rsi,  "Result of multiplying third and fourth user inputs: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+mov eax, 0
+mov [], eax
+
+
+; print a string
+mov rsi,  "Enter a radius: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+mov eax, 0
+mov [userRadius], eax
+
+
+; read an integer
+lea rdi, [fmtuintin]
+lea rsi, [userRadius]
+mov rax, 0
+call scanf
+
+
+; print a string
+mov rsi,  "The volume is: "
+mov rdi, fmtstr
+mov rax, 0
+call printf
+
+
+; print a string
+mov rsi,  "Congratulations on the great semester!"
+mov rdi, fmtstr
+mov rax, 0
+call printf

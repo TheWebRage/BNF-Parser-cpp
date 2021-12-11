@@ -164,3 +164,18 @@ void printTable(map<string, map<string, int>> table, string tableName = "") {
 		std::cout << "\n";
 	}
 }
+
+string removeBeginSpace(string eraseString) {
+	while (eraseString[0] == ' ') {
+		eraseString.erase(0, 1);
+	}
+	return eraseString;
+}
+
+bool isInString(string compString, char compChar) {
+	for (char ch : compString)
+		if (ch == compChar)
+			return true;
+
+	return false;
+}

@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <stack>
 #include <algorithm>
 #include <string>
 #include <fstream>
@@ -20,6 +21,7 @@ using std::vector;
 using std::map;
 using std::set;
 using std::pair;
+using std::stack;
 using std::cout;
 using std::ofstream;
 
@@ -38,6 +40,8 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 	stack.push_back("eof");
 	stack.push_back("GOAL");
 	focus = stack.back();
+
+	// TODO: check to see if it is a procedure call before failing
 
 	while (true) {
 
@@ -157,13 +161,16 @@ int main()
 
 	// Keep track of the IR
 	vector < variable > variables;
+	stack <vector<variable> > scope;
 	
-	bool isProcedure = false;
 
 	// Keeps track of the main body asm output
 	string asmBody = "";
 
-	for (string line : file) {
+	for (int i = 0; i < file.size(); i++) {
+		string line = file[i];
+		bool isCheck = true;
+
 		// Skip lines with comments
 		if (line[0] == '/' && line[1] == '/') {
 			cout << "\n\n" << line << "\n";
@@ -177,38 +184,65 @@ int main()
 		Node* root = nullptr;
 		variable var;
 
-		// If first word is a print function // TODO: get prints working hacky here
+		// If first word is a print function; get asm for print
+		if (line.find("printString") != string::npos || line.find("printNum") != string::npos) {
+			asmBody += getPrintString(line, variables);
+			isCheck = false;
+			passedStr = "valid";
+		}
 
-		// TODO: get procedures working here hacky
+		if (line.find("readNum") != string::npos) {
+			// If readNum is found, output asm for it
+			string lineCopy = line;
+			asmBody += readNum(lineCopy.erase(0, 8));
+			isCheck = false;
+			passedStr = "valid";
+		}
+
+		// If '{' is in the line; Push scope to stack and start new scope
+		if (isInString(line, '{')) {
+			// TODO: create scope here // Use scope variable here
+			isCheck = false;
+			passedStr = "valid";
+		}
+
+		// If '}' is in line; Pop scope off stack and continue to use that scope
+		if (isInString(line, '}')) {
+			// TODO: end scope here // Use scope variable here
+			isCheck = false;
+			passedStr = "valid";
+		}
+
+		// If procedure is in line; create label point here
+		if (line.find("procedure") != string::npos) {
+			// TODO: get procedure
+			// - add procedure name to labels
+
+			isCheck = false;
+			passedStr = "valid";
+		}
 
 		// Perform the algorithm
-		if (checkLine(productionTable, parseTable, line, root, var, variables)) {
+		if (isCheck && checkLine(productionTable, parseTable, line, root, var, variables)) {
 			try {
 				passedStr = "valid";
 
-				if (var.type == "procedure" || isProcedure) {
-					isProcedure == true;
-					// TODO: save vars for procedure here
-				} else {
+				// Perform Math operation on line using post-order traversal and save into variables
+				var.value = performCalc(root, var.type, variables);
 
-					// Perform Math operation on line using post-order traversal and save into variables
-					var.value = performCalc(root, var.type, variables);
-					var.root = root;
-				}
+				// Add asm output for optimized line
+				asmBody += operationEq(var);
 
-				// Check to see if the procedure has finished
-				if (!line.find_first_not_of(' ') == '}') {
-					// TODO: pop procedure stack here
-					// - keep track of what is the current procedure by looking at the top of this stack
-					isProcedure = false;
-				}
-
-				variables.push_back(var);
 			}
 			catch (std::exception e) {
-				passedStr = "invalid";
+				// passedStr = "invalid";
+				// TODO: Make certain vars wait for runtime to perform operation
+				// - post order traversal on root node but with outputing asm instead
+				var.isOptimized = false;
 			}
 
+			var.root = root;
+			variables.push_back(var);
 		}
 
 		cout << "(" << passedStr << "): " << line << "\n";

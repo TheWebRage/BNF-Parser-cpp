@@ -24,7 +24,8 @@ public:
 	string type;
 	string name;
 	float value;
-	bool isProcedure;
+
+	bool isOptimized;
 
 	Node* root;
 };
@@ -130,8 +131,8 @@ T operate(T val1, T val2, string selfValue, vector<variable> variables) {
 
 template<typename T>
 float nestNode(Node* curNode, string type, vector<variable> variables) {
-	T val1 = 0;
-	T val2 = 0;
+	T val1;
+	T val2;
 
 	// Reverse order operation
 	if (curNode->child1 != nullptr)
@@ -139,12 +140,14 @@ float nestNode(Node* curNode, string type, vector<variable> variables) {
 	if (curNode->child2 != nullptr)
 		val2 = nestNode<T>(curNode->child2, type, variables);
 
-	return operate<T>(val1, val2, curNode->value, variables);
+	T value = operate<T>(val1, val2, curNode->value, variables);
+	return value;
 }
 
 float performCalc(Node* root, string type, vector<variable> variables) {
 
 	if (root != nullptr)
+		// TODO: Check to see if the operation has to wait for runtime
 
 		// Decide what type to pass in
 		if (type == "ish")
