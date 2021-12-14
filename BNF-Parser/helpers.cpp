@@ -14,6 +14,7 @@ using std::vector;
 using std::set;
 using std::map;
 using std::ifstream;
+using std::ofstream;
 
 
 vector<string> readInFile(string filePath) {
@@ -32,6 +33,14 @@ vector<string> readInFile(string filePath) {
 		file.close();
 	}
 	return lines;
+}
+
+void writeToFile(string asmBody, string startFile) {
+	// Output to an asm file
+	ofstream fileO;
+	fileO.open("./output/output.asm");
+	fileO << startFile + "\n" + asmBody;
+	fileO.close();
 }
 
 

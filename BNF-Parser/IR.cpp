@@ -8,6 +8,7 @@
 using std::string;
 using std::vector;
 
+
 class Node {
 public:
 
@@ -19,16 +20,26 @@ public:
 	Node* parent;
 };
 
-struct variable {
+class variable {
 public:
+
 	string type;
 	string name;
 	float value;
 
-	bool isOptimized;
+	bool isOptimized = false;
 
 	Node* root;
 };
+
+variable* findVariableByName(vector<variable> variables, string name) {
+	for (variable var : variables) {
+		if (var.name == name)
+			return &var;
+	}
+
+	return nullptr;
+}
 
 void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& variables) {
 
@@ -61,7 +72,7 @@ void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& var
 
 		if (!isInteger(word)) {
 			for (variable var : variables) {
-				if (var.name == word) {
+				if (var.name == word && var.isOptimized) {
 					intValue = std::to_string(var.value);
 
 					if (intValue[0] == '-')
@@ -118,6 +129,9 @@ T operate(T val1, T val2, string selfValue, vector<variable> variables) {
 				break;
 			}
 		}
+
+		// Var not found in list
+
 	}
 
 	// if type is a float, return float string
@@ -129,10 +143,19 @@ T operate(T val1, T val2, string selfValue, vector<variable> variables) {
 	return std::stoi(intValue);
 }
 
+bool shouldWaitForRuntime(Node* curNodeChild) {
+	return curNodeChild != nullptr && (!std::isdigit(curNodeChild->value[0]) && !isOperator(curNodeChild->value));
+}
+
 template<typename T>
 float nestNode(Node* curNode, string type, vector<variable> variables) {
 	T val1;
 	T val2;
+
+	// if one of the children is a name, it needs to wait for runtime
+	if (shouldWaitForRuntime(curNode->child1) || shouldWaitForRuntime(curNode->child2)) {
+		throw std::runtime_error("This needs to be executed at runtime");
+	}
 
 	// Reverse order operation
 	if (curNode->child1 != nullptr)

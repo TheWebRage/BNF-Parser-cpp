@@ -195,6 +195,18 @@ int main()
 			// If readNum is found, output asm for it
 			string lineCopy = line;
 			asmBody += readNum(lineCopy.erase(0, 8));
+
+			// Set var to be unOptimized
+			std::cout << lineCopy;
+
+			for (int i = 0; i < variables.size(); i++) {
+				variable var = variables[i];
+				if (var.name == lineCopy) {
+					var.isOptimized = false;
+				}
+			}
+
+
 			isCheck = false;
 			passedStr = "valid";
 		}
@@ -229,16 +241,30 @@ int main()
 
 				// Perform Math operation on line using post-order traversal and save into variables
 				var.value = performCalc(root, var.type, variables);
+				var.isOptimized = true;
+
+				if (i < file.size() && file[i+1].find("readNum") != string::npos) {
+					var.isOptimized = false;
+				}
 
 				// Add asm output for optimized line
+				asmBody += "\n; " + line + " => Optimized";
 				asmBody += operationEq(var);
 
 			}
+			catch (std::invalid_argument e) { passedStr = "invalid"; }
 			catch (std::exception e) {
 				// passedStr = "invalid";
 				// TODO: Make certain vars wait for runtime to perform operation
 				// - post order traversal on root node but with outputing asm instead
-				var.isOptimized = false;
+				try {
+					var.isOptimized = false;
+					asmBody += "\n; " + line;
+					getOpString(root, asmBody, var.name); // TODO: check to make sure all times it comes in here is when we want it to
+				}
+				catch (std::exception e) {
+					passedStr = "invalid";
+				}
 			}
 
 			var.root = root;
@@ -256,12 +282,7 @@ int main()
 			cout << var.type << " " << var.name << " = " << var.value << "\n";
 	}
 
-
-	// Output to an asm file
-	ofstream fileO;
-	fileO.open("./output/output.asm");
-	fileO << startFile(variables) + asmBody;
-	fileO.close();
+	writeToFile(asmBody, startFile(variables));
 
 
 	return 0;

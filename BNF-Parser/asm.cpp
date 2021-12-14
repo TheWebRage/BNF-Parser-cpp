@@ -69,87 +69,107 @@ string readNum(string varName) {
         "call scanf\n";
 }
 
+string movValInReg(string val, string reg = "ebx") {
+    return "\nmov " + reg + ", " + val;
+}
+
+string movVarInReg(string varName, string reg = "ebx") {
+    return "\nmov " + reg + ", [" + varName + "]";
+}
+
+string movRegInVar(string varName, string reg = "ebx") {
+    return "\nmov [" + varName + "], eax\n"; // This will always need to return eax into memory
+}
+
 // TODO: create a class to operation overload to output to asm with template types
 string operationEq(variable var) {
-    string output = "\nmov eax, " + (int)var.value;
+    int value = var.value;
+
+    string output = "\nmov eax, " + std::to_string(value);
     output += "\nmov [" + var.name + "], eax\n";
 
     return output;
 }
 
-string operationPlus(variable var1, variable var2) {
-    string output = "\nmov eax, " + (int)var1.value;
-    output += "\naddi eax, " + (int)var2.value;
-    output += "\nmov [" + var1.name + "], eax\n";
-
-    return output;
+string operationPlus() {
+    return "\nadd eax, ebx";
 }
 
-string operationMinus(variable var1, variable var2) {
-    string output = "\nmov eax, " + (int)var1.value;
-    output += "\naddi eax, " + (int)var2.value;
-    output += "\nmov [" + var1.name + "], eax\n";
-
-    return output;
+string operationMinus() {
+    return "\nsub eax, ebx";
 }
 
-string operationMult(variable var1, variable var2) {
-    string output = "\nmov eax, " + (int)var1.value;
-    output += "\nmuli eax, " + (int)var2.value;
-    output += "\nmov [" + var1.name + "], eax\n";
-
-    return output;
+string operationMult() {
+    return "\nmul eax, ebx";
 }
 
-string operationDiv(variable var1, variable var2) {
-    string output = "\nmov eax, " + (int)var1.value;
-    output += "\ndivi eax, " + (int)var2.value;
-    output += "\nmov [" + var1.name + "], eax\n";
-
-    return output;
+string operationDiv() {
+    return "\ndiv eax, ebx";
 }
 
-string operationPow(variable var1, variable var2) {
-    string output = "\nmov eax, " + (int)var1.value;
-    output += "\naddi eax, " + (int)var2.value; // TODO: get all operations working correctly
-    output += "\nmov [" + var1.name + "], eax\n";
-
-    return output;
+string operationPow() {
+    // TODO: pow needs work
+    return "\naddi eax, ebx"; // TODO: get all operations working correctly
 }
 
-string getOperationString(Node* curNode, string* output) {
-    int var1, var2;
-    
-    // TODO: make system for both vars and values
+string getOperationString(Node* curNode, string& output, bool& isFirstVar) {
+    // Post-order traversal
     if (curNode->child1 != nullptr)
-        var1 = getOperationString(curNode->child1, output);
+        getOperationString(curNode->child1, output, isFirstVar);
     if (curNode->child2 != nullptr)
-        vargetOperationString(curNode->child2, output);
+        getOperationString(curNode->child2, output, isFirstVar);
 
     // If value in curNode = variable or value
+    // - Add "mov eax, <value>" to output then return
     if (!isOperator(curNode->value)) {
-        // Add "mov eax, <value>" to output then return
+
+        // TODO: Need to distinguish between eax and ebx
+        string regName = "ebx";
+
+        if (isFirstVar) regName = "eax";
+        
+        // Int value
+        if (std::isdigit((curNode->value)[0])) {
+            output += movVarInReg(curNode->value, regName);
+        }
+
+        // Assume Variable
+        else {
+            output += movValInReg(curNode->value, regName);
+        }
+
+        isFirstVar = false;
+        return "";
     }
     
     // If value in curNode = operator
     else {
         // Add operation method to output then return
         if (curNode->value == "+") {
-            output += operationPlus(); // TODO: finish this
+            output += operationPlus();
         }
         else if (curNode->value == "-") {
-
+            output += operationMinus();
         }
         else if (curNode->value == "*") {
-
+            output += operationMult();
         }
         else if (curNode->value == "/") {
-
+            output += operationDiv();
         }
         else if (curNode->value == "^") {
-
+            output += operationPow();
         }
     }
+
+    return "";
+}
+
+// Starts the getOperationString process
+void getOpString(Node* root, string& output, string varName) {
+    bool isFirstVar = true;
+    getOperationString(root, output, isFirstVar);
+    output += movRegInVar(varName);
 }
 
 string getPrintString(string line, vector<variable> variables) {
@@ -184,4 +204,5 @@ string getPrintString(string line, vector<variable> variables) {
 // TODO: BUGS:
 // - Some vars are created with empty names
 // - asm print string are getting too many lines
+// - floats printing (as ints) - Don't print in asm at all?
 
