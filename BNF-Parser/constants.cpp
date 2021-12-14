@@ -339,7 +339,7 @@ vector<vector<string>> createProductionTable() {
 	productionTable.push_back({ "printIsh", "name" });
 	productionTable.push_back({ "readNum", "name" });
 	productionTable.push_back({ "readIsh", "name" });
-	productionTable.push_back({ "printString" }); // TODO: What does this do?
+	productionTable.push_back({ "printString" }); 
 	productionTable.push_back({ "LINEVARNAME" });
 	productionTable.push_back({ "procedure", "name", "PROCEDUREPARAMS", "{" });
 	productionTable.push_back({ "name", "LINEVARNAMEREMAINING" });

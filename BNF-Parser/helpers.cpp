@@ -188,3 +188,13 @@ bool isInString(string compString, char compChar) {
 
 	return false;
 }
+
+int getStrPos(string opStr, char opCh) {
+	for (int i = 0; i < opStr.size(); i++) {
+		char ch = opStr[i];
+		if (ch == opCh) {
+			return i;
+		}
+	}
+	return -1;
+}

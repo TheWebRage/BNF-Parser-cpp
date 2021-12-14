@@ -41,13 +41,11 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 	stack.push_back("GOAL");
 	focus = stack.back();
 
-	// TODO: check to see if it is a procedure call before failing
-
 	while (true) {
 
 		if (focus == "eof" && word == "eof") {
 			// then report successand exit the loop;
-			return 1; // TODO: return the actual end value of the stack
+			return 1;
 		}
 		else if (isTerminal(focus) || focus == "eof") {
 			if (focus == getTermType(word)) {
@@ -84,14 +82,24 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 
 				// If word is name for variable
 
-				word = nextWord(line, isNegVal);
+				string nextNewWord = nextWord(line, isNegVal);
 				if (line[0] == ' ')
 					line.erase(0, 1);
 
-				line.erase(0, word.size());
+				line.erase(0, nextNewWord.size());
 
-				while (word[0] == ' ')
-					word.erase(0, 1);
+				while (nextNewWord[0] == ' ')
+					nextNewWord.erase(0, 1);
+
+				// Gets procedure name and procedure params
+				if (focus == "" && nextNewWord == "(") {
+					// TODO: store list of labels and store that in the tree like a varName
+					// - maybe store in a special node type that holds param values
+					// - then make un optimized
+					// - in asm look through labelnames like how varNames are done
+				}
+
+				word = nextNewWord;
 
 			}
 			else {
@@ -162,6 +170,8 @@ int main()
 	// Keep track of the IR
 	vector < variable > variables;
 	stack <vector<variable> > scope;
+
+	string procName = "";
 	
 
 	// Keeps track of the main body asm output
@@ -197,8 +207,6 @@ int main()
 			asmBody += readNum(lineCopy.erase(0, 8));
 
 			// Set var to be unOptimized
-			std::cout << lineCopy;
-
 			for (int i = 0; i < variables.size(); i++) {
 				variable var = variables[i];
 				if (var.name == lineCopy) {
@@ -211,24 +219,44 @@ int main()
 			passedStr = "valid";
 		}
 
+		// If procedure is in line; create label point here
+		if (line.find("procedure") != string::npos) {
+			string lineCopy = line;
+			lineCopy.erase(0, 14);
+			procName = lineCopy.substr(0, getStrPos(lineCopy, '('));
+
+			asmBody += asmSetProcedureLabel(procName);
+
+			isCheck = false;
+			passedStr = "valid";
+		}
+
+		if (line.find("return") != string::npos) {
+			string lineCopy = line;
+			lineCopy.erase(0, 7);
+			asmBody += asmReturn(procName, lineCopy);
+			isCheck = false;
+			passedStr = "valid";
+		}
+
 		// If '{' is in the line; Push scope to stack and start new scope
 		if (isInString(line, '{')) {
-			// TODO: create scope here // Use scope variable here
+			// Create scope here // Use scope variable here
+			scope.push(variables);
+			variables.clear();
+			asmBody += asmPushStack();
+
 			isCheck = false;
 			passedStr = "valid";
 		}
 
 		// If '}' is in line; Pop scope off stack and continue to use that scope
 		if (isInString(line, '}')) {
-			// TODO: end scope here // Use scope variable here
-			isCheck = false;
-			passedStr = "valid";
-		}
-
-		// If procedure is in line; create label point here
-		if (line.find("procedure") != string::npos) {
-			// TODO: get procedure
-			// - add procedure name to labels
+			// End scope here // Use scope variable here
+			variables.clear();
+			variables = scope.top();
+			scope.pop();
+			// asmBody += asmPopStack();
 
 			isCheck = false;
 			passedStr = "valid";
@@ -254,8 +282,7 @@ int main()
 			}
 			catch (std::invalid_argument e) { passedStr = "invalid"; }
 			catch (std::exception e) {
-				// passedStr = "invalid";
-				// TODO: Make certain vars wait for runtime to perform operation
+				// Make certain vars wait for runtime to perform operation
 				// - post order traversal on root node but with outputing asm instead
 				try {
 					var.isOptimized = false;

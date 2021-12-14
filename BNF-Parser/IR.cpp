@@ -170,7 +170,6 @@ float nestNode(Node* curNode, string type, vector<variable> variables) {
 float performCalc(Node* root, string type, vector<variable> variables) {
 
 	if (root != nullptr)
-		// TODO: Check to see if the operation has to wait for runtime
 
 		// Decide what type to pass in
 		if (type == "ish")

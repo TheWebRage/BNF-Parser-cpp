@@ -62,12 +62,8 @@ userResult1: resd 1
 userResult2: resd 1
 userResult3: resd 1
 userResult4: resd 1
-result: resd 1
-: resd 1
-: resd 1
 a: resd 1
 b: resd 1
-: resd 1
 userRadius: resd 1
 
 section.text
@@ -703,11 +699,47 @@ mov rsi, [userResult4]
 xor rax, rax
 call printf
 
+
+j addend
+add:
+
+push eax
+push ebx
+
 ; num result = a + b
 mov eax, a
 mov ebx, b
 add eax, ebx
 mov [result], eax
+
+pop ebx
+pop eax
+
+mov eax, [result]
+ret 
+addend: 
+
+
+
+j multend
+mult:
+
+push eax
+push ebx
+
+; num result = a * b
+mov eax, a
+mov ebx, b
+mul eax, ebx
+mov [result], eax
+
+pop ebx
+pop eax
+
+mov eax, [result]
+ret 
+multend: 
+
 
 ; num a = 2 => Optimized
 mov eax, 2
@@ -730,6 +762,35 @@ mov rsi,  "Result of multiplying third and fourth user inputs: "
 mov rdi, fmtstr
 mov rax, 0
 call printf
+
+
+j computeApproxSphereVolumeend
+computeApproxSphereVolume:
+
+push eax
+push ebx
+
+; num result = radius ^ 3 * 4 * 31416 / 10000 / 3
+mov eax, radius
+mov ebx, [3]
+addi eax, ebx TODO: get power working
+mov ebx, [4]
+mul eax, ebx
+mov ebx, [31416]
+mul eax, ebx
+mov ebx, [10000]
+div eax, ebx
+mov ebx, [3]
+div eax, ebx
+mov [result], eax
+
+pop ebx
+pop eax
+
+mov eax, [result]
+ret 
+computeApproxSphereVolumeend: 
+
 
 
 ; print a string

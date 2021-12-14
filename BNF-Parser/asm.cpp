@@ -108,8 +108,17 @@ string operationDiv() {
 }
 
 string operationPow() {
-    // TODO: pow needs work
-    return "\naddi eax, ebx"; // TODO: get all operations working correctly
+    return "\n"
+        "\nxor edi, edi"
+        "\nmov     eax, 1" // TODO: get this working
+        "\nmov     edx, r9"
+        "\nexp_start{ immediateName }:"
+        "\ncmp edi, edx"
+        "\njz exp_done{ immediateName }"
+        "\nimul eax, r8"
+        "\ninc edi"
+        "\njmp exp_start{ immediateName }"
+        "\nexp_done{ immediateName }:";
 }
 
 string getOperationString(Node* curNode, string& output, bool& isFirstVar) {
@@ -123,7 +132,7 @@ string getOperationString(Node* curNode, string& output, bool& isFirstVar) {
     // - Add "mov eax, <value>" to output then return
     if (!isOperator(curNode->value)) {
 
-        // TODO: Need to distinguish between eax and ebx
+        // Distinguish between eax and ebx
         string regName = "ebx";
 
         if (isFirstVar) regName = "eax";
@@ -170,6 +179,22 @@ void getOpString(Node* root, string& output, string varName) {
     bool isFirstVar = true;
     getOperationString(root, output, isFirstVar);
     output += movRegInVar(varName);
+}
+
+string asmPushStack() {
+    return "\npush eax\npush ebx\n";
+}
+
+string asmPopStack() {
+    return "\npop ebx\npop eax\n";
+}
+
+string asmSetProcedureLabel(string procedureName) {
+    return "\n\nj " + procedureName + "end\n" + procedureName + ":\n";
+}
+
+string asmReturn(string procedureName, string varName) {
+    return asmPopStack() + "\nmov eax, [" + varName + "]\nret \n" + procedureName + "end: \n\n";
 }
 
 string getPrintString(string line, vector<variable> variables) {
