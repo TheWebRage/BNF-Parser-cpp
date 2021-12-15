@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{AF908044-B5DC-42CC-B8E5-544E356A5189}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>BNFParser</RootNamespace>
+    <RootNamespace>LL1-Compiler</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>LL1-Compiler</ProjectName>
   </PropertyGroup>

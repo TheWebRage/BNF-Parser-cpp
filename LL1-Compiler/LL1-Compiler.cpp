@@ -26,7 +26,7 @@ using std::cout;
 using std::ofstream;
 
 
-bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables) {
+bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<string> labels) {
 	vector<string> stack;
 	string focus;
 	Node* focusNode = root;
@@ -92,7 +92,20 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 					nextNewWord.erase(0, 1);
 
 				// Gets procedure name and procedure params
-				if (focus == "" && nextNewWord == "(") {
+				if (focus == "name" && nextNewWord == "(") {
+					// insert values in eax and ebx and call label
+					string eaxReg = line.substr(0, line.find(','));
+					line.erase(0, eaxReg.size() + 1);
+					string ebxReg = line.substr(0, line.find(')'));
+					line.erase(0, eaxReg.size() + 1);
+
+					removeBeginSpace(eaxReg);
+					removeBeginSpace(ebxReg);
+
+					movValInReg(eaxReg);
+					movValInReg(ebxReg);
+					callFunction(word);
+
 					// TODO: store list of labels and store that in the tree like a varName
 					// - maybe store in a special node type that holds param values
 					// - then make un optimized
@@ -168,6 +181,7 @@ int main()
 	map<string, map<string, int>> parseTable = createParseTable(productionTable);
 
 	// Keep track of the IR
+	vector <string> labels;
 	vector < variable > variables;
 	stack <vector<variable> > scope;
 
@@ -263,7 +277,7 @@ int main()
 		}
 
 		// Perform the algorithm
-		if (isCheck && checkLine(productionTable, parseTable, line, root, var, variables)) {
+		if (isCheck && checkLine(productionTable, parseTable, line, root, var, variables, labels)) {
 			try {
 				passedStr = "valid";
 

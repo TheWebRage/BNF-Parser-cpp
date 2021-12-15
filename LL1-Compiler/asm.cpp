@@ -69,6 +69,10 @@ string readNum(string varName) {
         "call scanf\n";
 }
 
+string callFunction(string label) {
+    return "\n";
+}
+
 string movValInReg(string val, string reg = "ebx") {
     return "\nmov " + reg + ", " + val;
 }
