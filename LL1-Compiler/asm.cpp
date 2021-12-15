@@ -70,7 +70,7 @@ string readNum(string varName) {
 }
 
 string callFunction(string label) {
-    return "\n";
+    return "\ncall " + label;
 }
 
 string movValInReg(string val, string reg = "ebx") {
@@ -125,12 +125,12 @@ string operationPow() {
         "\nexp_done{ immediateName }:";
 }
 
-string getOperationString(Node* curNode, string& output, bool& isFirstVar) {
+string getOperationString(Node* curNode, string& output, bool& isFirstVar, vector<string> labels) {
     // Post-order traversal
     if (curNode->child1 != nullptr)
-        getOperationString(curNode->child1, output, isFirstVar);
+        getOperationString(curNode->child1, output, isFirstVar, labels);
     if (curNode->child2 != nullptr)
-        getOperationString(curNode->child2, output, isFirstVar);
+        getOperationString(curNode->child2, output, isFirstVar, labels);
 
     // If value in curNode = variable or value
     // - Add "mov eax, <value>" to output then return
@@ -148,6 +148,12 @@ string getOperationString(Node* curNode, string& output, bool& isFirstVar) {
 
         // Assume Variable
         else {
+            for (string label : labels) {
+                if (label == curNode->value) {
+                    return ""; // TODO: make function call procedureal
+                }
+            }
+
             output += movValInReg(curNode->value, regName);
         }
 
@@ -179,9 +185,9 @@ string getOperationString(Node* curNode, string& output, bool& isFirstVar) {
 }
 
 // Starts the getOperationString process
-void getOpString(Node* root, string& output, string varName) {
+void getOpString(Node* root, string& output, string varName, vector<string> labels) {
     bool isFirstVar = true;
-    getOperationString(root, output, isFirstVar);
+    getOperationString(root, output, isFirstVar, labels);
     output += movRegInVar(varName);
 }
 

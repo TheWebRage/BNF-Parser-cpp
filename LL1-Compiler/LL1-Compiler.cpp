@@ -26,7 +26,7 @@ using std::cout;
 using std::ofstream;
 
 
-bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<string> labels) {
+bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<string> labels, string& output) {
 	vector<string> stack;
 	string focus;
 	Node* focusNode = root;
@@ -96,15 +96,28 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 					// insert values in eax and ebx and call label
 					string eaxReg = line.substr(0, line.find(','));
 					line.erase(0, eaxReg.size() + 1);
-					string ebxReg = line.substr(0, line.find(')'));
-					line.erase(0, eaxReg.size() + 1);
+					string ebxReg = "0";
+					ebxReg = line.substr(0, line.find(')'));
+					line.erase(0, eaxReg.size() + 2);
 
 					removeBeginSpace(eaxReg);
 					removeBeginSpace(ebxReg);
 
-					movValInReg(eaxReg);
-					movValInReg(ebxReg);
-					callFunction(word);
+					output += movValInReg(eaxReg);
+					output += movValInReg(ebxReg);
+					output += callFunction(word);
+
+					if (line == "")
+						return 1;
+
+					nextNewWord = nextWord(line, isNegVal);
+					if (line[0] == ' ')
+						line.erase(0, 1);
+
+					line.erase(0, nextNewWord.size());
+
+					while (nextNewWord[0] == ' ')
+						nextNewWord.erase(0, 1);
 
 					// TODO: store list of labels and store that in the tree like a varName
 					// - maybe store in a special node type that holds param values
@@ -238,6 +251,7 @@ int main()
 			string lineCopy = line;
 			lineCopy.erase(0, 14);
 			procName = lineCopy.substr(0, getStrPos(lineCopy, '('));
+			labels.push_back(procName);
 
 			asmBody += asmSetProcedureLabel(procName);
 
@@ -277,12 +291,12 @@ int main()
 		}
 
 		// Perform the algorithm
-		if (isCheck && checkLine(productionTable, parseTable, line, root, var, variables, labels)) {
+		if (isCheck && checkLine(productionTable, parseTable, line, root, var, variables, labels, asmBody)) {
 			try {
 				passedStr = "valid";
 
 				// Perform Math operation on line using post-order traversal and save into variables
-				var.value = performCalc(root, var.type, variables);
+				var.value = performCalc(root, var.type, variables, labels, asmBody);
 				var.isOptimized = true;
 
 				if (i < file.size() && file[i+1].find("readNum") != string::npos) {
@@ -301,7 +315,7 @@ int main()
 				try {
 					var.isOptimized = false;
 					asmBody += "\n; " + line;
-					getOpString(root, asmBody, var.name); // TODO: check to make sure all times it comes in here is when we want it to
+					getOpString(root, asmBody, var.name, labels); // TODO: check to make sure all times it comes in here is when we want it to
 				}
 				catch (std::exception e) {
 					passedStr = "invalid";

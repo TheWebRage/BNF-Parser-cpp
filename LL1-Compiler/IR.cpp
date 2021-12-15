@@ -96,7 +96,7 @@ void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& var
 }
 
 template<typename T>
-T operate(T val1, T val2, string selfValue, vector<variable> variables) {
+T operate(T val1, T val2, string selfValue, vector<variable> variables, vector<string> labels, string& output) {
 	if (selfValue == "+")
 		return val1 + val2;
 	if (selfValue == "-")
@@ -119,14 +119,24 @@ T operate(T val1, T val2, string selfValue, vector<variable> variables) {
 	string intValue = selfValue;
 
 	if (!isInteger(selfValue)) {
+		bool isVar = false;
 		for (variable var : variables) {
 			if (var.name == selfValue) {
 				intValue = var.value;
+				isVar = true;
 
 				if (selfValue[0] == '-')
 					intValue.erase(0, 1);
 
 				break;
+			}
+		}
+
+		if (!isVar) {
+			for (string label : labels) {
+				if (label == selfValue) {
+					throw std::exception("Used");
+				}
 			}
 		}
 
@@ -148,7 +158,7 @@ bool shouldWaitForRuntime(Node* curNodeChild) {
 }
 
 template<typename T>
-float nestNode(Node* curNode, string type, vector<variable> variables) {
+float nestNode(Node* curNode, string type, vector<variable> variables, vector<string> labels, string& output) {
 	T val1;
 	T val2;
 
@@ -159,23 +169,23 @@ float nestNode(Node* curNode, string type, vector<variable> variables) {
 
 	// Reverse order operation
 	if (curNode->child1 != nullptr)
-		val1 = nestNode<T>(curNode->child1, type, variables);
+		val1 = nestNode<T>(curNode->child1, type, variables, labels, output);
 	if (curNode->child2 != nullptr)
-		val2 = nestNode<T>(curNode->child2, type, variables);
+		val2 = nestNode<T>(curNode->child2, type, variables, labels, output);
 
-	T value = operate<T>(val1, val2, curNode->value, variables);
+	T value = operate<T>(val1, val2, curNode->value, variables, labels, output);
 	return value;
 }
 
-float performCalc(Node* root, string type, vector<variable> variables) {
+float performCalc(Node* root, string type, vector<variable> variables, vector<string> labels, string& output) {
 
 	if (root != nullptr)
 
 		// Decide what type to pass in
 		if (type == "ish")
-			return nestNode<float>(root, type, variables);
+			return nestNode<float>(root, type, variables, labels, output);
 		else
-			return nestNode<int>(root, type, variables);
+			return nestNode<int>(root, type, variables, labels, output);
 
 	else
 		return 0;
