@@ -5,9 +5,9 @@ fmtstr : db "%s", 10, 0
 fmtuint : db "%d", 10, 0
 fmtuintin : db "%d", 0
 fmtfloatin : db "%f", 0
-float1 : dd     0.0
 
 section.bss
+result: resd 1
 
 var1: resd 1
 var2: resd 1
@@ -15,17 +15,14 @@ var3: resd 1
 var4: resd 1
 var5: resd 1
 var6: resd 1
-var7: resd 1
 var8: resd 1
 var9: resd 1
 var10: resd 1
 var11: resd 1
-var12: resd 1
 var13: resd 1
 var14: resd 1
 var15: resd 1
 var16: resd 1
-var17: resd 1
 var18: resd 1
 var19: resd 1
 var21: resd 1
@@ -40,10 +37,6 @@ var42: resd 1
 var43: resd 1
 var44: resd 1
 var45: resd 1
-float1: resd 1
-float2: resd 1
-float3: resd 1
-float4: resd 1
 issue1: resd 1
 issue2: resd 1
 error: resd 1
@@ -69,7 +62,6 @@ result2: resd 1
 result3: resd 1
 result4: resd 1
 result5: resd 1
-result7: resd 1
 result8: resd 1
 userResult5: resd 1
 userResult6: resd 1
@@ -81,7 +73,7 @@ section.text
 extern printf
 extern scanf
 global main
-main :
+main:
 push rbp; Push base pointer onto stack to save it
 
 
@@ -151,17 +143,6 @@ mov rsi, [var6]
 xor rax, rax
 call printf
 
-; num var7 = 2 * 2 + 5 * 5 => Optimized
-mov eax, 29
-mov [var7], eax
-
-
-; print integer back out
-lea rdi, [fmtuint]
-mov rsi, [var7]
-xor rax, rax
-call printf
-
 ; num var8 = 42 => Optimized
 mov eax, 42
 mov [var8], eax
@@ -206,17 +187,6 @@ mov rsi, [var11]
 xor rax, rax
 call printf
 
-; num var12 = 1234*5678 => Optimized
-mov eax, 7006652
-mov [var12], eax
-
-
-; print integer back out
-lea rdi, [fmtuint]
-mov rsi, [var12]
-xor rax, rax
-call printf
-
 ; num var13 = ((12-8)-3) => Optimized
 mov eax, 1
 mov [var13], eax
@@ -258,17 +228,6 @@ mov [var16], eax
 ; print integer back out
 lea rdi, [fmtuint]
 mov rsi, [var16]
-xor rax, rax
-call printf
-
-; num var17 = (((((9+(2*(110-(30/2))))*8)+1000)/2)+(((3*3*3*3)+1)/2)) => Optimized
-mov eax, 1337
-mov [var17], eax
-
-
-; print integer back out
-lea rdi, [fmtuint]
-mov rsi, [var17]
 xor rax, rax
 call printf
 
@@ -441,22 +400,6 @@ lea rdi, [fmtuint]
 mov rsi, [var45]
 xor rax, rax
 call printf
-
-; ish float1 = 3.5 => Optimized
-mov eax, 3
-mov [float1], eax
-
-; ish float2 = (3.5) => Optimized
-mov eax, 3
-mov [float2], eax
-
-; ish float3 = ((3.55)) => Optimized
-mov eax, 3
-mov [float3], eax
-
-; ish float4 = 3.14159+2.718218 => Optimized
-mov eax, 5
-mov [float4], eax
 
 ; num issue1 = 5 => Optimized
 mov eax, 5
@@ -686,7 +629,7 @@ call printf
 ; num userResult3 = user1 * user2
 mov eax, user1
 mov ebx, user2
-mul eax, ebx
+imul eax, ebx
 mov [userResult3], eax
 
 
@@ -699,7 +642,7 @@ call printf
 ; num userResult4 = user3 / user4
 mov eax, user3
 mov ebx, user4
-div eax, ebx
+div ebx
 mov [userResult4], eax
 
 
@@ -710,11 +653,11 @@ xor rax, rax
 call printf
 
 
-j addend
+jmp addend
 add:
 
-push eax
-push ebx
+push rax
+push rbx
 
 ; num result = a + b
 mov eax, a
@@ -722,8 +665,8 @@ mov ebx, b
 add eax, ebx
 mov [result], eax
 
-pop ebx
-pop eax
+pop rbx
+pop rax
 
 mov eax, [result]
 ret 
@@ -731,27 +674,27 @@ addend:
 
 
 
-j multend
+jmp multend
 mult:
 
-push eax
-push ebx
+push rax
+push rbx
 
 ; num result = a * b
 mov eax, a
 mov ebx, b
-mul eax, ebx
+imul eax, ebx
 mov [result], eax
 
-pop ebx
-pop eax
+pop rbx
+pop rax
 
 mov eax, [result]
 ret 
 multend: 
 
 
-mov ebx, 2
+mov eax, 2
 mov ebx,  3
 call add
 ; num result1 = add(2, 3)
@@ -772,7 +715,7 @@ mov [a], eax
 mov eax, 3
 mov [b], eax
 
-mov ebx, a
+mov eax, [a]
 mov ebx,  b
 call add
 ; num result2 = add(a, b)
@@ -785,7 +728,7 @@ mov rsi, [result2]
 xor rax, rax
 call printf
 
-mov ebx, a
+mov eax, [a]
 mov ebx,  b
 call mult
 ; num result3 = mult(a, b)
@@ -798,8 +741,8 @@ mov rsi, [result3]
 xor rax, rax
 call printf
 
-mov ebx, a
-mov ebx, a
+mov eax, [a]
+mov ebx, [a]
 call mult
 ; num result4 = mult(a,a)
 mov [result4], eax
@@ -811,8 +754,8 @@ mov rsi, [result4]
 xor rax, rax
 call printf
 
-mov ebx, b
-mov ebx, b
+mov eax, [b]
+mov ebx, [b]
 call mult
 ; num result5 = mult(b,b)
 mov [result5], eax
@@ -824,34 +767,17 @@ mov rsi, [result5]
 xor rax, rax
 call printf
 
-mov ebx, a
-mov ebx,  b
+mov eax, [a]
+mov ebx, [a]
 call add
-mov ebx, a
-mov ebx,  b
+mov eax, [a]
+mov ebx, [b]
 call mult
-; num result7 = add(a, b) - mult(a, b)
-sub eax, ebx
-mov [result7], eax
-
-
-; print integer back out
-lea rdi, [fmtuint]
-mov rsi, [result7]
-xor rax, rax
-call printf
-
-mov ebx, a
-mov ebx, a
-call add
-mov ebx, a
-mov ebx, b
-call mult
-mov ebx, b
-mov ebx, b
+mov eax, [b]
+mov ebx, [b]
 call mult
 ; num result8 = add(a,a) + mult(a,b) * mult(b,b)
-mul eax, ebx
+imul eax, ebx
 add eax, ebx
 mov [result8], eax
 
@@ -862,9 +788,6 @@ mov rsi, [result8]
 xor rax, rax
 call printf
 
-mov ebx, add(a
-mov ebx, b
-call add
 
 ; print a string
 mov rsi,  "Result of adding first and second user inputs: "
@@ -872,7 +795,7 @@ mov rdi, fmtstr
 mov rax, 0
 call printf
 
-mov ebx, user1
+mov eax, [user1]
 mov ebx,  user2
 call add
 ; num userResult5 = add(user1, user2)
@@ -892,7 +815,7 @@ mov rdi, fmtstr
 mov rax, 0
 call printf
 
-mov ebx, user3
+mov eax, [user3]
 mov ebx,  user4
 call mult
 ; num userResult6 = mult(user3, user4)
@@ -906,38 +829,39 @@ xor rax, rax
 call printf
 
 
-j computeApproxSphereVolumeend
+jmp computeApproxSphereVolumeend
 computeApproxSphereVolume:
 
-push eax
-push ebx
+push rax
+push rbx
 
 ; num result = radius ^ 3 * 4 * 31416 / 10000 / 3
 mov eax, radius
 mov ebx, [3]
 
 xor edi, edi
-mov     eax, 1
-mov     edx, r9
-exp_start{ immediateName }:
-cmp edi, edx
-jz exp_done{ immediateName }
-imul eax, r8
+mov r8, 1
+mov r9, eax
+exp_start98:
+cmp edi, ebx
+jz exp_done98
+imul r8, ecx
 inc edi
-jmp exp_start{ immediateName }
-exp_done{ immediateName }:
+jmp exp_start98
+exp_done98:
+
 mov ebx, [4]
-mul eax, ebx
+imul eax, ebx
 mov ebx, [31416]
-mul eax, ebx
+imul eax, ebx
 mov ebx, [10000]
-div eax, ebx
+div ebx
 mov ebx, [3]
-div eax, ebx
+div ebx
 mov [result], eax
 
-pop ebx
-pop eax
+pop rbx
+pop rax
 
 mov eax, [result]
 ret 
@@ -962,8 +886,7 @@ lea rsi, [userRadius]
 mov rax, 0
 call scanf
 
-mov ebx, userRadius)
-mov ebx, 
+mov ebx, [userRadius]
 call computeApproxSphereVolume
 ; num volume = computeApproxSphereVolume(userRadius)
 mov [volume], eax

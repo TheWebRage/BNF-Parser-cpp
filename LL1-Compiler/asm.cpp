@@ -17,9 +17,9 @@ string startFile(vector<variable> variables) {
         "fmtuint : db \"%d\", 10, 0\n"
         "fmtuintin : db \"%d\", 0\n"
         "fmtfloatin : db \"%f\", 0\n"
-        "float1 : dd     0.0\n"
         "\n"
-        "section.bss\n";
+        "section.bss\n"
+        "result: resd 1\n";
 
     for (variable var : variables) {
         output += "\n" + var.name + ": resd 1";
@@ -33,7 +33,7 @@ string startFile(vector<variable> variables) {
         "extern printf\n"
         "extern scanf\n"
         "global main\n"
-        "main :\n"
+        "main:\n"
         "push rbp; Push base pointer onto stack to save it\n";
 
     return output;
@@ -104,25 +104,27 @@ string operationMinus() {
 }
 
 string operationMult() {
-    return "\nmul eax, ebx";
+    return "\nimul eax, ebx";
 }
 
 string operationDiv() {
-    return "\ndiv eax, ebx";
+    return "\ndiv ebx";
 }
 
+char nextPowerNum = 'a';
+
 string operationPow() {
-    return "\n"
-        "\nxor edi, edi"
-        "\nmov     eax, 1" // TODO: get this working
-        "\nmov     edx, r9"
-        "\nexp_start{ immediateName }:"
-        "\ncmp edi, edx"
-        "\njz exp_done{ immediateName }"
-        "\nimul eax, r8"
-        "\ninc edi"
-        "\njmp exp_start{ immediateName }"
-        "\nexp_done{ immediateName }:";
+    nextPowerNum++;
+    string nextNum = std::to_string(nextPowerNum);
+    string output = "\n\nxor edi, edi\nmov r8, 1\nmov r9, eax\nexp_start" + nextNum + ":\ncmp edi, ebx\njz exp_done" + nextNum;
+    output += "\nimul r8, ecx\ninc edi\njmp exp_start" + nextNum;
+    output += "\nexp_done" + nextNum;
+    output += ":\n";
+    return output;
+}
+
+string asmSyscall() {
+
 }
 
 string getOperationString(Node* curNode, string& output, bool& isFirstVar, vector<string> labels) {
@@ -192,15 +194,15 @@ void getOpString(Node* root, string& output, string varName, vector<string> labe
 }
 
 string asmPushStack() {
-    return "\npush eax\npush ebx\n";
+    return "\npush rax\npush rbx\n";
 }
 
 string asmPopStack() {
-    return "\npop ebx\npop eax\n";
+    return "\npop rbx\npop rax\n";
 }
 
 string asmSetProcedureLabel(string procedureName) {
-    return "\n\nj " + procedureName + "end\n" + procedureName + ":\n";
+    return "\n\njmp " + procedureName + "end\n" + procedureName + ":\n";
 }
 
 string asmReturn(string procedureName, string varName) {

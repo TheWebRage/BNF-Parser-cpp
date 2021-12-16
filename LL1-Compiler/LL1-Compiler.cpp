@@ -26,6 +26,58 @@ using std::cout;
 using std::ofstream;
 
 
+void parseFunction(string& line, string& output, string word, vector<variable> variables) {// insert values in eax and ebx and call label
+	string eaxReg1 = line.substr(0, line.find(','));
+	string eaxReg2 = line.substr(0, line.find(')'));
+
+	if (eaxReg1.size() < eaxReg2.size()) {
+		line.erase(0, eaxReg1.size() + 1);
+		string ebxReg = "0";
+		ebxReg = line.substr(0, line.find(')'));
+		line.erase(0, eaxReg1.size() + 2);
+
+		removeBeginSpace(eaxReg1);
+		removeBeginSpace(ebxReg);
+
+		bool isVar = true;
+		for (variable var : variables) {
+			if (var.name == eaxReg1) {
+				output += movVarInReg(eaxReg1, "eax");
+				isVar = false;
+				break;
+			}
+		}
+
+		if (isVar) {
+			output += movValInReg(eaxReg1, "eax");
+		}
+
+		isVar = true;
+		for (variable var : variables) {
+			if (var.name == ebxReg) {
+				output += movVarInReg(ebxReg, "ebx");
+				isVar = false;
+				break;
+			}
+		}
+
+		if (isVar) {
+			output += movValInReg(ebxReg, "ebx");
+		}
+	}
+
+	// For method calls with one parameter
+	else {
+		line.erase(0, eaxReg2.size() + 1);
+		removeBeginSpace(eaxReg2);
+		output += movVarInReg(eaxReg2);
+	}
+
+	output += callFunction(word);
+
+	// TODO: allow for function calls inside function calls
+}
+
 bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<string> labels, string& output) {
 	vector<string> stack;
 	string focus;
@@ -93,19 +145,7 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 
 				// Gets procedure name and procedure params
 				if (focus == "name" && nextNewWord == "(") {
-					// insert values in eax and ebx and call label
-					string eaxReg = line.substr(0, line.find(','));
-					line.erase(0, eaxReg.size() + 1);
-					string ebxReg = "0";
-					ebxReg = line.substr(0, line.find(')'));
-					line.erase(0, eaxReg.size() + 2);
-
-					removeBeginSpace(eaxReg);
-					removeBeginSpace(ebxReg);
-
-					output += movValInReg(eaxReg);
-					output += movValInReg(ebxReg);
-					output += callFunction(word);
+					parseFunction(line, output, word, variables);
 
 					if (line == "")
 						return 1;
@@ -118,11 +158,6 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 
 					while (nextNewWord[0] == ' ')
 						nextNewWord.erase(0, 1);
-
-					// TODO: store list of labels and store that in the tree like a varName
-					// - maybe store in a special node type that holds param values
-					// - then make un optimized
-					// - in asm look through labelnames like how varNames are done
 				}
 
 				word = nextNewWord;
@@ -342,4 +377,11 @@ int main()
 
 	return 0;
 }
+
+
+// TODO:
+// - function call to funciton call gets messed up
+// - function call vars before call are not '[]' - Cant add them for vals though
+// - function arguments both being placed into ebx
+// - exponent section
 
