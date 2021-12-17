@@ -32,6 +32,20 @@ public:
 	Node* root;
 };
 
+class procedure {
+public:
+	string type;
+	string name;
+	vector<variable> parameters;
+
+	procedure() {}
+
+	procedure(string name, vector<variable> parameters) {
+		this->name = name;
+		this->parameters = parameters;
+	}
+};
+
 variable* findVariableByName(vector<variable> variables, string name) {
 	for (variable var : variables) {
 		if (var.name == name)
@@ -96,7 +110,7 @@ void addToTree(Node*& root, Node*& focusNode, string word, vector<variable>& var
 }
 
 template<typename T>
-T operate(T val1, T val2, string selfValue, vector<variable> variables, vector<string> labels, string& output) {
+T operate(T val1, T val2, string selfValue, vector<variable> variables, vector<procedure>& labels, string& output) {
 	if (selfValue == "+")
 		return val1 + val2;
 	if (selfValue == "-")
@@ -133,8 +147,8 @@ T operate(T val1, T val2, string selfValue, vector<variable> variables, vector<s
 		}
 
 		if (!isVar) {
-			for (string label : labels) {
-				if (label == selfValue) {
+			for (procedure label : labels) {
+				if (label.name == selfValue) {
 					throw std::exception("Used");
 				}
 			}
@@ -158,7 +172,7 @@ bool shouldWaitForRuntime(Node* curNodeChild) {
 }
 
 template<typename T>
-float nestNode(Node* curNode, string type, vector<variable> variables, vector<string> labels, string& output) {
+float nestNode(Node* curNode, string type, vector<variable> variables, vector<procedure>& labels, string& output) {
 	T val1;
 	T val2;
 
@@ -177,7 +191,7 @@ float nestNode(Node* curNode, string type, vector<variable> variables, vector<st
 	return value;
 }
 
-float performCalc(Node* root, string type, vector<variable> variables, vector<string> labels, string& output) {
+float performCalc(Node* root, string type, vector<variable> variables, vector<procedure>& labels, string& output) {
 
 	if (root != nullptr)
 

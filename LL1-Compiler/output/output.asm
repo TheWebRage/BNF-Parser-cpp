@@ -1,13 +1,25 @@
 
-section.data
-msg : db "Hello, this is my string", 0
-fmtstr : db "%s", 10, 0
-fmtuint : db "%d", 10, 0
-fmtuintin : db "%d", 0
-fmtfloatin : db "%f", 0
+section .data
+msg: db "Hello, this is my string", 0
+fmtstr: db "%s", 10, 0
+fmtuint: db "%d", 10, 0
+fmtuintin: db "%d", 0
+fmtfloatin: db "%f", 0
 
-section.bss
-result: resd 1
+s1: db "This begins the user input section", 0
+s10: db "The volume is: ", 0
+s11: db "Congratulations on the great semester!", 0
+s2: db "Supply data and hit enter", 0
+s3: db "Enter a number: ", 0
+s4: db "Enter a number: ", 0
+s5: db "Enter a number: ", 0
+s6: db "Enter a number: ", 0
+s7: db "Result of adding first and second user inputs: ", 0
+s8: db "Result of multiplying third and fourth user inputs: ", 0
+s9: db "Enter a radius: ", 0
+
+
+section .bss
 
 var1: resd 1
 var2: resd 1
@@ -15,14 +27,17 @@ var3: resd 1
 var4: resd 1
 var5: resd 1
 var6: resd 1
+var7: resd 1
 var8: resd 1
 var9: resd 1
 var10: resd 1
 var11: resd 1
+var12: resd 1
 var13: resd 1
 var14: resd 1
 var15: resd 1
 var16: resd 1
+var17: resd 1
 var18: resd 1
 var19: resd 1
 var21: resd 1
@@ -62,24 +77,28 @@ result2: resd 1
 result3: resd 1
 result4: resd 1
 result5: resd 1
+result7: resd 1
 result8: resd 1
 userResult5: resd 1
 userResult6: resd 1
 userRadius: resd 1
 volume: resd 1
 
-section.text
+result: resd 1
+radius: resd 1
+
+section .text
 
 extern printf
 extern scanf
 global main
 main:
-push rbp; Push base pointer onto stack to save it
+push rbp; Push base pointer onto stack to save it ; Needed for scanf
 
 
 ; num var1 = 3*4 => Optimized
-mov eax, 12
-mov [var1], eax
+mov rax, 12
+mov [var1], rax
 
 
 ; print integer back out
@@ -89,8 +108,8 @@ xor rax, rax
 call printf
 
 ; num var2 = 12 / 6 => Optimized
-mov eax, 2
-mov [var2], eax
+mov rax, 2
+mov [var2], rax
 
 
 ; print integer back out
@@ -100,8 +119,8 @@ xor rax, rax
 call printf
 
 ; num var3 = 12/6 => Optimized
-mov eax, 2
-mov [var3], eax
+mov rax, 2
+mov [var3], rax
 
 
 ; print integer back out
@@ -111,8 +130,8 @@ xor rax, rax
 call printf
 
 ; num var4 = 5 + 4 * 3 => Optimized
-mov eax, 17
-mov [var4], eax
+mov rax, 17
+mov [var4], rax
 
 
 ; print integer back out
@@ -122,8 +141,8 @@ xor rax, rax
 call printf
 
 ; num var5 = 12 + 34 * 45 => Optimized
-mov eax, 1542
-mov [var5], eax
+mov rax, 1542
+mov [var5], rax
 
 
 ; print integer back out
@@ -133,8 +152,8 @@ xor rax, rax
 call printf
 
 ; num var6 = (4 / 5) => Optimized
-mov eax, 0
-mov [var6], eax
+mov rax, 0
+mov [var6], rax
 
 
 ; print integer back out
@@ -143,9 +162,20 @@ mov rsi, [var6]
 xor rax, rax
 call printf
 
+; num var7 = 2 * 2 + 5 * 5 => Optimized
+mov rax, 29
+mov [var7], rax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var7]
+xor rax, rax
+call printf
+
 ; num var8 = 42 => Optimized
-mov eax, 42
-mov [var8], eax
+mov rax, 42
+mov [var8], rax
 
 
 ; print integer back out
@@ -155,8 +185,8 @@ xor rax, rax
 call printf
 
 ; num var9 = (42) => Optimized
-mov eax, 42
-mov [var9], eax
+mov rax, 42
+mov [var9], rax
 
 
 ; print integer back out
@@ -166,8 +196,8 @@ xor rax, rax
 call printf
 
 ; num var10 = ((42)) => Optimized
-mov eax, 42
-mov [var10], eax
+mov rax, 42
+mov [var10], rax
 
 
 ; print integer back out
@@ -177,8 +207,8 @@ xor rax, rax
 call printf
 
 ; num var11 = ( ( 42 ) ) => Optimized
-mov eax, 42
-mov [var11], eax
+mov rax, 42
+mov [var11], rax
 
 
 ; print integer back out
@@ -187,9 +217,20 @@ mov rsi, [var11]
 xor rax, rax
 call printf
 
+; num var12 = 1234*5678 => Optimized
+mov rax, 7006652
+mov [var12], rax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var12]
+xor rax, rax
+call printf
+
 ; num var13 = ((12-8)-3) => Optimized
-mov eax, 1
-mov [var13], eax
+mov rax, 1
+mov [var13], rax
 
 
 ; print integer back out
@@ -199,8 +240,8 @@ xor rax, rax
 call printf
 
 ; num var14 = (5*(8/4)) => Optimized
-mov eax, 10
-mov [var14], eax
+mov rax, 10
+mov [var14], rax
 
 
 ; print integer back out
@@ -210,8 +251,8 @@ xor rax, rax
 call printf
 
 ; num var15 = (1+2) * 3 => Optimized
-mov eax, 9
-mov [var15], eax
+mov rax, 9
+mov [var15], rax
 
 
 ; print integer back out
@@ -221,8 +262,8 @@ xor rax, rax
 call printf
 
 ; num var16 = (((2+3)*4)+(7+(8/2))) => Optimized
-mov eax, 31
-mov [var16], eax
+mov rax, 31
+mov [var16], rax
 
 
 ; print integer back out
@@ -231,9 +272,20 @@ mov rsi, [var16]
 xor rax, rax
 call printf
 
+; num var17 = (((((9+(2*(110-(30/2))))*8)+1000)/2)+(((3*3*3*3)+1)/2)) => Optimized
+mov rax, 1337
+mov [var17], rax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [var17]
+xor rax, rax
+call printf
+
 ; num var18 = -42 => Optimized
-mov eax, -42
-mov [var18], eax
+mov rax, -42
+mov [var18], rax
 
 
 ; print integer back out
@@ -243,8 +295,8 @@ xor rax, rax
 call printf
 
 ; num var19 = (-42) => Optimized
-mov eax, -42
-mov [var19], eax
+mov rax, -42
+mov [var19], rax
 
 
 ; print integer back out
@@ -254,8 +306,8 @@ xor rax, rax
 call printf
 
 ; num var21 = (-42 ) => Optimized
-mov eax, -42
-mov [var21], eax
+mov rax, -42
+mov [var21], rax
 
 
 ; print integer back out
@@ -265,8 +317,8 @@ xor rax, rax
 call printf
 
 ; num var23 = 2-3 => Optimized
-mov eax, -1
-mov [var23], eax
+mov rax, -1
+mov [var23], rax
 
 
 ; print integer back out
@@ -276,8 +328,8 @@ xor rax, rax
 call printf
 
 ; num var24 = 2 - 3 => Optimized
-mov eax, -1
-mov [var24], eax
+mov rax, -1
+mov [var24], rax
 
 
 ; print integer back out
@@ -287,10 +339,10 @@ xor rax, rax
 call printf
 
 ; num var34 = -2 - (-3)
-mov eax, -2
-mov ebx, -3
-sub eax, ebx
-mov [var34], eax
+mov rax, -2
+mov rbx, -3
+sub rax, rbx
+mov [var34], rax
 
 
 ; print integer back out
@@ -300,12 +352,12 @@ xor rax, rax
 call printf
 
 ; num var35 = -2 - (-3 - (4))
-mov eax, -2
-mov ebx, -3
-mov ebx, [4]
-sub eax, ebx
-sub eax, ebx
-mov [var35], eax
+mov rax, -2
+mov rbx, -3
+mov rbx, 4
+sub rax, rbx
+sub rax, rbx
+mov [var35], rax
 
 
 ; print integer back out
@@ -315,12 +367,12 @@ xor rax, rax
 call printf
 
 ; num var36 = -2 - (-3 - (4))
-mov eax, -2
-mov ebx, -3
-mov ebx, [4]
-sub eax, ebx
-sub eax, ebx
-mov [var36], eax
+mov rax, -2
+mov rbx, -3
+mov rbx, 4
+sub rax, rbx
+sub rax, rbx
+mov [var36], rax
 
 
 ; print integer back out
@@ -330,14 +382,14 @@ xor rax, rax
 call printf
 
 ; num var39 = -2 - (-2 - (-2 - 2))
-mov eax, -2
-mov ebx, -2
-mov ebx, -2
-mov ebx, [2]
-sub eax, ebx
-sub eax, ebx
-sub eax, ebx
-mov [var39], eax
+mov rax, -2
+mov rbx, -2
+mov rbx, -2
+mov rbx, 2
+sub rax, rbx
+sub rax, rbx
+sub rax, rbx
+mov [var39], rax
 
 
 ; print integer back out
@@ -347,8 +399,8 @@ xor rax, rax
 call printf
 
 ; num var41 = 3^3 => Optimized
-mov eax, 27
-mov [var41], eax
+mov rax, 27
+mov [var41], rax
 
 
 ; print integer back out
@@ -358,8 +410,8 @@ xor rax, rax
 call printf
 
 ; num var42 = 4 ^ 4 => Optimized
-mov eax, 256
-mov [var42], eax
+mov rax, 256
+mov [var42], rax
 
 
 ; print integer back out
@@ -369,8 +421,8 @@ xor rax, rax
 call printf
 
 ; num var43 = 3^3^3 => Optimized
-mov eax, 19683
-mov [var43], eax
+mov rax, 19683
+mov [var43], rax
 
 
 ; print integer back out
@@ -380,8 +432,8 @@ xor rax, rax
 call printf
 
 ; num var44 = 3^(3^3) => Optimized
-mov eax, 2030534528
-mov [var44], eax
+mov rax, 2030534528
+mov [var44], rax
 
 
 ; print integer back out
@@ -391,8 +443,8 @@ xor rax, rax
 call printf
 
 ; num var45 = 5 + 4 * 3 ^ 2 => Optimized
-mov eax, 149
-mov [var45], eax
+mov rax, 149
+mov [var45], rax
 
 
 ; print integer back out
@@ -402,16 +454,16 @@ xor rax, rax
 call printf
 
 ; num issue1 = 5 => Optimized
-mov eax, 5
-mov [issue1], eax
+mov rax, 5
+mov [issue1], rax
 
 ; num issue2 = 3 + 4 => Optimized
-mov eax, 7
-mov [issue2], eax
+mov rax, 7
+mov [issue2], rax
 
 ; num orig = 4 + 2 => Optimized
-mov eax, 6
-mov [orig], eax
+mov rax, 6
+mov [orig], rax
 
 
 ; print integer back out
@@ -421,8 +473,8 @@ xor rax, rax
 call printf
 
 ; num copy = orig => Optimized
-mov eax, 6
-mov [copy], eax
+mov rax, 6
+mov [copy], rax
 
 
 ; print integer back out
@@ -432,8 +484,8 @@ xor rax, rax
 call printf
 
 ; num var49 = var1 + var2 => Optimized
-mov eax, 14
-mov [var49], eax
+mov rax, 14
+mov [var49], rax
 
 
 ; print integer back out
@@ -443,8 +495,8 @@ xor rax, rax
 call printf
 
 ; num var50 = var1 - var2 => Optimized
-mov eax, 10
-mov [var50], eax
+mov rax, 10
+mov [var50], rax
 
 
 ; print integer back out
@@ -454,8 +506,8 @@ xor rax, rax
 call printf
 
 ; num var51 = var2 - var1 => Optimized
-mov eax, -10
-mov [var51], eax
+mov rax, -10
+mov [var51], rax
 
 
 ; print integer back out
@@ -465,8 +517,8 @@ xor rax, rax
 call printf
 
 ; num var52 = var1 * var1 => Optimized
-mov eax, 144
-mov [var52], eax
+mov rax, 144
+mov [var52], rax
 
 
 ; print integer back out
@@ -476,8 +528,8 @@ xor rax, rax
 call printf
 
 ; num var53 = (var3 + var4) * (var5 + var3) => Optimized
-mov eax, 29336
-mov [var53], eax
+mov rax, 29336
+mov [var53], rax
 
 
 ; print integer back out
@@ -488,28 +540,28 @@ call printf
 
 
 ; print a string
-mov rsi,  "This begins the user input section"
+mov rsi, s1
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
 
 ; print a string
-mov rsi,  "Supply data and hit enter"
+mov rsi, s2
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
 
 ; print a string
-mov rsi,  "Enter a number: "
+mov rsi, s3
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
 ; num user1 = 0 => Optimized
-mov eax, 0
-mov [user1], eax
+mov rax, 0
+mov [user1], rax
 
 
 ; read an integer
@@ -527,14 +579,14 @@ call printf
 
 
 ; print a string
-mov rsi,  "Enter a number: "
+mov rsi, s4
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
 ; num user2 = 0 => Optimized
-mov eax, 0
-mov [user2], eax
+mov rax, 0
+mov [user2], rax
 
 
 ; read an integer
@@ -552,14 +604,14 @@ call printf
 
 
 ; print a string
-mov rsi,  "Enter a number: "
+mov rsi, s5
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
 ; num user3 = 0 => Optimized
-mov eax, 0
-mov [user3], eax
+mov rax, 0
+mov [user3], rax
 
 
 ; read an integer
@@ -577,14 +629,14 @@ call printf
 
 
 ; print a string
-mov rsi,  "Enter a number: "
+mov rsi, s6
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
 ; num user4 = 0 => Optimized
-mov eax, 0
-mov [user4], eax
+mov rax, 0
+mov [user4], rax
 
 
 ; read an integer
@@ -601,10 +653,10 @@ xor rax, rax
 call printf
 
 ; num userResult1 = user1 + user2
-mov eax, user1
-mov ebx, user2
-add eax, ebx
-mov [userResult1], eax
+mov rax, [user1]
+mov rbx, [user2]
+add rax, rbx
+mov [userResult1], rax
 
 
 ; print integer back out
@@ -614,10 +666,10 @@ xor rax, rax
 call printf
 
 ; num userResult2 = user3 - user4
-mov eax, user3
-mov ebx, user4
-sub eax, ebx
-mov [userResult2], eax
+mov rax, [user3]
+mov rbx, [user4]
+sub rax, rbx
+mov [userResult2], rax
 
 
 ; print integer back out
@@ -627,10 +679,10 @@ xor rax, rax
 call printf
 
 ; num userResult3 = user1 * user2
-mov eax, user1
-mov ebx, user2
-imul eax, ebx
-mov [userResult3], eax
+mov rax, [user1]
+mov rbx, [user2]
+imul rax, rbx
+mov [userResult3], rax
 
 
 ; print integer back out
@@ -640,10 +692,11 @@ xor rax, rax
 call printf
 
 ; num userResult4 = user3 / user4
-mov eax, user3
-mov ebx, user4
-div ebx
-mov [userResult4], eax
+mov rax, [user3]
+mov rbx, [user4]
+xor rdx, rdx
+div rbx
+mov [userResult4], rax
 
 
 ; print integer back out
@@ -660,15 +713,15 @@ push rax
 push rbx
 
 ; num result = a + b
-mov eax, a
-mov ebx, b
-add eax, ebx
-mov [result], eax
+mov rax, [a]
+mov rbx, [b]
+add rax, rbx
+mov [result], rax
 
 pop rbx
 pop rax
 
-mov eax, [result]
+mov rax, [result]
 ret 
 addend: 
 
@@ -681,24 +734,28 @@ push rax
 push rbx
 
 ; num result = a * b
-mov eax, a
-mov ebx, b
-imul eax, ebx
-mov [result], eax
+mov rax, [a]
+mov rbx, [b]
+imul rax, rbx
+mov [result], rax
 
 pop rbx
 pop rax
 
-mov eax, [result]
+mov rax, [result]
 ret 
 multend: 
 
 
-mov eax, 2
-mov ebx,  3
+mov rax, 2
+mov [a], rax
+
+mov rax, 3
+mov [b], rax
+
 call add
 ; num result1 = add(2, 3)
-mov [result1], eax
+mov [result1], rax
 
 
 ; print integer back out
@@ -708,18 +765,22 @@ xor rax, rax
 call printf
 
 ; num a = 2 => Optimized
-mov eax, 2
-mov [a], eax
+mov rax, 2
+mov [a], rax
 
 ; num b = 3 => Optimized
-mov eax, 3
-mov [b], eax
+mov rax, 3
+mov [b], rax
 
-mov eax, [a]
-mov ebx,  b
+mov rax, [a]
+mov [a], rax
+
+mov rax, [b]
+mov [b], rax
+
 call add
 ; num result2 = add(a, b)
-mov [result2], eax
+mov [result2], rax
 
 
 ; print integer back out
@@ -728,11 +789,15 @@ mov rsi, [result2]
 xor rax, rax
 call printf
 
-mov eax, [a]
-mov ebx,  b
+mov rax, [a]
+mov [a], rax
+
+mov rax, [b]
+mov [b], rax
+
 call mult
 ; num result3 = mult(a, b)
-mov [result3], eax
+mov [result3], rax
 
 
 ; print integer back out
@@ -741,11 +806,15 @@ mov rsi, [result3]
 xor rax, rax
 call printf
 
-mov eax, [a]
-mov ebx, [a]
+mov rax, [a]
+mov [a], rax
+
+mov rax, [a]
+mov [b], rax
+
 call mult
 ; num result4 = mult(a,a)
-mov [result4], eax
+mov [result4], rax
 
 
 ; print integer back out
@@ -754,11 +823,15 @@ mov rsi, [result4]
 xor rax, rax
 call printf
 
-mov eax, [b]
-mov ebx, [b]
+mov rax, [b]
+mov [a], rax
+
+mov rax, [b]
+mov [b], rax
+
 call mult
 ; num result5 = mult(b,b)
-mov [result5], eax
+mov [result5], rax
 
 
 ; print integer back out
@@ -767,19 +840,56 @@ mov rsi, [result5]
 xor rax, rax
 call printf
 
-mov eax, [a]
-mov ebx, [a]
+mov rax, [a]
+mov [a], rax
+
+mov rax, [b]
+mov [b], rax
+
 call add
-mov eax, [a]
-mov ebx, [b]
+mov rax, [a]
+mov [a], rax
+
+mov rax, [b]
+mov [b], rax
+
 call mult
-mov eax, [b]
-mov ebx, [b]
+; num result7 = add(a, b) - mult(a, b)
+sub rax, rbx
+mov [result7], rax
+
+
+; print integer back out
+lea rdi, [fmtuint]
+mov rsi, [result7]
+xor rax, rax
+call printf
+
+mov rax, [a]
+mov [a], rax
+
+mov rax, [a]
+mov [b], rax
+
+call add
+mov rax, [a]
+mov [a], rax
+
+mov rax, [b]
+mov [b], rax
+
+call mult
+mov rax, [b]
+mov [a], rax
+
+mov rax, [b]
+mov [b], rax
+
 call mult
 ; num result8 = add(a,a) + mult(a,b) * mult(b,b)
-imul eax, ebx
-add eax, ebx
-mov [result8], eax
+imul rax, rbx
+add rax, rbx
+mov [result8], rax
 
 
 ; print integer back out
@@ -790,16 +900,20 @@ call printf
 
 
 ; print a string
-mov rsi,  "Result of adding first and second user inputs: "
+mov rsi, s7
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
-mov eax, [user1]
-mov ebx,  user2
+mov rax, [user1]
+mov [a], rax
+
+mov rax, [user2]
+mov [b], rax
+
 call add
 ; num userResult5 = add(user1, user2)
-mov [userResult5], eax
+mov [userResult5], rax
 
 
 ; print integer back out
@@ -810,16 +924,20 @@ call printf
 
 
 ; print a string
-mov rsi,  "Result of multiplying third and fourth user inputs: "
+mov rsi, s8
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
-mov eax, [user3]
-mov ebx,  user4
+mov rax, [user3]
+mov [a], rax
+
+mov rax, [user4]
+mov [b], rax
+
 call mult
 ; num userResult6 = mult(user3, user4)
-mov [userResult6], eax
+mov [userResult6], rax
 
 
 ; print integer back out
@@ -836,48 +954,48 @@ push rax
 push rbx
 
 ; num result = radius ^ 3 * 4 * 31416 / 10000 / 3
-mov eax, radius
-mov ebx, [3]
+mov rax, [radius]
+mov rbx, 3
 
-xor edi, edi
-mov r8, 1
-mov r9, eax
+xor rdi, rdi
 exp_start98:
-cmp edi, ebx
+cmp rdi, rbx
 jz exp_done98
-imul r8, ecx
+mul rax
 inc edi
 jmp exp_start98
 exp_done98:
 
-mov ebx, [4]
-imul eax, ebx
-mov ebx, [31416]
-imul eax, ebx
-mov ebx, [10000]
-div ebx
-mov ebx, [3]
-div ebx
-mov [result], eax
+mov rbx, 4
+imul rax, rbx
+mov rbx, 31416
+imul rax, rbx
+mov rbx, 10000
+xor rdx, rdx
+div rbx
+mov rbx, 3
+xor rdx, rdx
+div rbx
+mov [result], rax
 
 pop rbx
 pop rax
 
-mov eax, [result]
+mov rax, [result]
 ret 
 computeApproxSphereVolumeend: 
 
 
 
 ; print a string
-mov rsi,  "Enter a radius: "
+mov rsi, s9
 mov rdi, fmtstr
 mov rax, 0
 call printf
 
 ; num userRadius = 0 => Optimized
-mov eax, 0
-mov [userRadius], eax
+mov rax, 0
+mov [userRadius], rax
 
 
 ; read an integer
@@ -886,14 +1004,16 @@ lea rsi, [userRadius]
 mov rax, 0
 call scanf
 
-mov ebx, [userRadius]
+mov rbx, [userRadius]
+mov [radius], rax
+
 call computeApproxSphereVolume
 ; num volume = computeApproxSphereVolume(userRadius)
-mov [volume], eax
+mov [volume], rax
 
 
 ; print a string
-mov rsi,  "The volume is: "
+mov rsi, s10
 mov rdi, fmtstr
 mov rax, 0
 call printf
@@ -907,7 +1027,12 @@ call printf
 
 
 ; print a string
-mov rsi,  "Congratulations on the great semester!"
+mov rsi, s11
 mov rdi, fmtstr
 mov rax, 0
 call printf
+
+
+mov rax, 60
+xor rdi, rdi
+syscall

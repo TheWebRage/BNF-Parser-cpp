@@ -174,7 +174,7 @@ void printTable(map<string, map<string, int>> table, string tableName = "") {
 	}
 }
 
-string removeBeginSpace(string eraseString) {
+string removeBeginSpace(string& eraseString) {
 	while (eraseString[0] == ' ') {
 		eraseString.erase(0, 1);
 	}

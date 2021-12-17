@@ -26,59 +26,73 @@ using std::cout;
 using std::ofstream;
 
 
-void parseFunction(string& line, string& output, string word, vector<variable> variables) {// insert values in eax and ebx and call label
-	string eaxReg1 = line.substr(0, line.find(','));
-	string eaxReg2 = line.substr(0, line.find(')'));
+void parseFunction(string& line, string& output, string word, vector<variable> variables, vector<procedure> labels) {// insert values in rax and rbx and call label
+	string raxReg1 = line.substr(0, line.find(','));
+	string raxReg2 = line.substr(0, line.find(')'));
 
-	if (eaxReg1.size() < eaxReg2.size()) {
-		line.erase(0, eaxReg1.size() + 1);
-		string ebxReg = "0";
-		ebxReg = line.substr(0, line.find(')'));
-		line.erase(0, eaxReg1.size() + 2);
+	procedure proc;
+	for (procedure proced : labels) {
+		if (proced.name == word) {
+			proc = proced;
+			break;
+		}
+	}
 
-		removeBeginSpace(eaxReg1);
-		removeBeginSpace(ebxReg);
+	if (raxReg1.size() < raxReg2.size()) {
+		line.erase(0, raxReg1.size() + 1);
+		string rbxReg = "0";
+		rbxReg = line.substr(0, line.find(')'));
+		line.erase(0, raxReg1.size() + 2);
 
-		bool isVar = true;
+		removeBeginSpace(raxReg1);
+		removeBeginSpace(rbxReg);
+
+		bool isVar = false;
 		for (variable var : variables) {
-			if (var.name == eaxReg1) {
-				output += movVarInReg(eaxReg1, "eax");
-				isVar = false;
+			if (var.name == raxReg1) {
+				output += movVarInReg(raxReg1, "rax");
+				output += movRegInVar(proc.parameters[0].name);
+				isVar = true;
 				break;
 			}
 		}
 
-		if (isVar) {
-			output += movValInReg(eaxReg1, "eax");
+		if (!isVar) {
+			output += movValInReg(raxReg1, "rax");
+			output += movRegInVar(proc.parameters[0].name);
 		}
 
-		isVar = true;
+		isVar = false;
 		for (variable var : variables) {
-			if (var.name == ebxReg) {
-				output += movVarInReg(ebxReg, "ebx");
-				isVar = false;
+			if (var.name == rbxReg) {
+				output += movVarInReg(rbxReg, "rax");
+				output += movRegInVar(proc.parameters[1].name);
+				isVar = true;
 				break;
 			}
 		}
 
-		if (isVar) {
-			output += movValInReg(ebxReg, "ebx");
+		if (!isVar) {
+			output += movValInReg(rbxReg, "rax");
+			output += movRegInVar(proc.parameters[1].name);
 		}
+
+		
 	}
 
 	// For method calls with one parameter
 	else {
-		line.erase(0, eaxReg2.size() + 1);
-		removeBeginSpace(eaxReg2);
-		output += movVarInReg(eaxReg2);
+		line.erase(0, raxReg2.size() + 1);
+		removeBeginSpace(raxReg2);
+		output += movVarInReg(raxReg2);
+		output += movRegInVar(proc.parameters[0].name);
 	}
 
 	output += callFunction(word);
 
-	// TODO: allow for function calls inside function calls
 }
 
-bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<string> labels, string& output) {
+bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<procedure>& labels, string& output) {
 	vector<string> stack;
 	string focus;
 	Node* focusNode = root;
@@ -145,7 +159,7 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 
 				// Gets procedure name and procedure params
 				if (focus == "name" && nextNewWord == "(") {
-					parseFunction(line, output, word, variables);
+					parseFunction(line, output, word, variables, labels);
 
 					if (line == "")
 						return 1;
@@ -229,8 +243,9 @@ int main()
 	map<string, map<string, int>> parseTable = createParseTable(productionTable);
 
 	// Keep track of the IR
-	vector <string> labels;
+	vector <procedure> labels;
 	vector < variable > variables;
+	map<string, string> strVars;
 	stack <vector<variable> > scope;
 
 	string procName = "";
@@ -258,7 +273,19 @@ int main()
 
 		// If first word is a print function; get asm for print
 		if (line.find("printString") != string::npos || line.find("printNum") != string::npos) {
-			asmBody += getPrintString(line, variables);
+			
+			if (line.find("printString") != string::npos) {
+				line.erase(0, 13);
+				line.erase(line.size() - 1, line.size());
+				removeBeginSpace(line);
+				string name = "s" + std::to_string(strVars.size() + 1);
+				strVars.insert({ name, line });
+				asmBody += printString(name);
+			}
+			else {
+				asmBody += getPrintString(line, variables);
+			}
+
 			isCheck = false;
 			passedStr = "valid";
 		}
@@ -286,7 +313,24 @@ int main()
 			string lineCopy = line;
 			lineCopy.erase(0, 14);
 			procName = lineCopy.substr(0, getStrPos(lineCopy, '('));
-			labels.push_back(procName);
+			lineCopy.erase(0, procName.size() + 5);
+
+			vector<variable> parameters;
+			if (lineCopy.find(',') != string::npos) {
+				string parameterName = lineCopy.substr(0, getStrPos(lineCopy, ','));
+				variable temp;
+				temp.name = parameterName;
+				parameters.push_back(temp);
+				lineCopy.erase(0, parameterName.size() + 6);
+			}
+
+			string parameterName = lineCopy.substr(0, getStrPos(lineCopy, ')'));
+			variable temp;
+			temp.name = parameterName;
+			parameters.push_back(temp);
+			lineCopy.erase(0, parameterName.size());
+
+			labels.push_back(*(new procedure(procName, parameters)));
 
 			asmBody += asmSetProcedureLabel(procName);
 
@@ -350,7 +394,7 @@ int main()
 				try {
 					var.isOptimized = false;
 					asmBody += "\n; " + line;
-					getOpString(root, asmBody, var.name, labels); // TODO: check to make sure all times it comes in here is when we want it to
+					getOpString(root, asmBody, var.name, labels); 
 				}
 				catch (std::exception e) {
 					passedStr = "invalid";
@@ -372,16 +416,15 @@ int main()
 			cout << var.type << " " << var.name << " = " << var.value << "\n";
 	}
 
-	writeToFile(asmBody, startFile(variables));
+	writeToFile(asmBody + asmSyscall(), startFile(variables, strVars, labels));
 
 
 	return 0;
 }
 
 
-// TODO:
-// - function call to funciton call gets messed up
-// - function call vars before call are not '[]' - Cant add them for vals though
-// - function arguments both being placed into ebx
-// - exponent section
+// TODO: asm
+// - values not all correct
+// - function calls with signs between
+// 
 
