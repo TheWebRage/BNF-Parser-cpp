@@ -957,14 +957,16 @@ push rbx
 mov rax, [radius]
 mov rbx, 3
 
+mov r8, 1
 xor rdi, rdi
 exp_start98:
 cmp rdi, rbx
 jz exp_done98
-mul rax
-inc edi
+imul r8, rax
+inc rdi
 jmp exp_start98
 exp_done98:
+mov rax, r8
 
 mov rbx, 4
 imul rax, rbx
@@ -1004,7 +1006,7 @@ lea rsi, [userRadius]
 mov rax, 0
 call scanf
 
-mov rbx, [userRadius]
+mov rax, [userRadius]
 mov [radius], rax
 
 call computeApproxSphereVolume

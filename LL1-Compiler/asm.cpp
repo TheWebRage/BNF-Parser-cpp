@@ -139,11 +139,11 @@ char nextPowerNum = 'a';
 string operationPow() {
     nextPowerNum++;
     string nextNum = std::to_string(nextPowerNum);
-    string output = "\n\nxor rdi, rdi\nexp_start" + nextNum + ":\ncmp rdi, rbx\njz exp_done" + nextNum;
-    output += "\nmul rax\ninc edi\njmp exp_start" + nextNum;
+    string output = "\n\nmov r8, 1\nxor rdi, rdi\nexp_start" + nextNum + ":\ncmp rdi, rbx\njz exp_done" + nextNum;
+    output += "\nimul r8, rax\ninc rdi\njmp exp_start" + nextNum;
     output += "\nexp_done" + nextNum;
     output += ":\n";
-    return output;
+    return output + "mov rax, r8\n";
 }
 
 string asmSyscall() {
@@ -216,8 +216,7 @@ string getOperationString(Node* curNode, string& output, bool& isFirstVar, vecto
 }
 
 // Starts the getOperationString process
-void getOpString(Node* root, string& output, string varName, vector<procedure>& labels) {
-    bool isFirstVar = true;
+void getOpString(Node* root, string& output, string varName, vector<procedure>& labels, bool isFirstVar) {
     getOperationString(root, output, isFirstVar, labels);
     output += movRegInVar(varName);
 }

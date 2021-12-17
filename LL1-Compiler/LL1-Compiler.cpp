@@ -26,7 +26,8 @@ using std::cout;
 using std::ofstream;
 
 
-void parseFunction(string& line, string& output, string word, vector<variable> variables, vector<procedure> labels) {// insert values in rax and rbx and call label
+void parseFunction(string& line, string& output, string word, vector<variable> variables, vector<procedure> labels, bool isFirstVar) {
+	// insert values in rax and rbx and call label
 	string raxReg1 = line.substr(0, line.find(','));
 	string raxReg2 = line.substr(0, line.find(')'));
 
@@ -84,15 +85,19 @@ void parseFunction(string& line, string& output, string word, vector<variable> v
 	else {
 		line.erase(0, raxReg2.size() + 1);
 		removeBeginSpace(raxReg2);
-		output += movVarInReg(raxReg2);
+		output += movVarInReg(raxReg2, "rax");
 		output += movRegInVar(proc.parameters[0].name);
 	}
 
 	output += callFunction(word);
 
+	if (!isFirstVar) {
+		output += ""; // TODO: after call, push returned val to stack and pop during actual operation
+	}
+
 }
 
-bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<procedure>& labels, string& output) {
+bool checkLine(vector<vector<string>> productionTable, map<string, map<string, int>> parseTable, string line, Node*& root, variable& var, vector<variable>& variables, vector<procedure>& labels, string& output, bool isFirstVar) {
 	vector<string> stack;
 	string focus;
 	Node* focusNode = root;
@@ -159,7 +164,7 @@ bool checkLine(vector<vector<string>> productionTable, map<string, map<string, i
 
 				// Gets procedure name and procedure params
 				if (focus == "name" && nextNewWord == "(") {
-					parseFunction(line, output, word, variables, labels);
+					parseFunction(line, output, word, variables, labels, isFirstVar);
 
 					if (line == "")
 						return 1;
@@ -267,6 +272,9 @@ int main()
 		string passedStr = "invalid";
 		string errorStr = "";
 
+		// Keeps track of the first part of the operation on the line; After the first operation starts to store in ebx
+		bool isFirstVar = true;
+
 		// Keeps track of the values in a tree
 		Node* root = nullptr;
 		variable var;
@@ -370,7 +378,7 @@ int main()
 		}
 
 		// Perform the algorithm
-		if (isCheck && checkLine(productionTable, parseTable, line, root, var, variables, labels, asmBody)) {
+		if (isCheck && checkLine(productionTable, parseTable, line, root, var, variables, labels, asmBody, isFirstVar)) {
 			try {
 				passedStr = "valid";
 
@@ -394,7 +402,7 @@ int main()
 				try {
 					var.isOptimized = false;
 					asmBody += "\n; " + line;
-					getOpString(root, asmBody, var.name, labels); 
+					getOpString(root, asmBody, var.name, labels, isFirstVar);
 				}
 				catch (std::exception e) {
 					passedStr = "invalid";
